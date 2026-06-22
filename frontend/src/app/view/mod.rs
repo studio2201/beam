@@ -19,13 +19,6 @@ impl App {
                     html! {
                         <>
                             <header>
-                                <div class="notepad-controls">
-                                    <button id="refresh-button" class="icon-button" onclick={ctx.link().callback(|_| Msg::RefreshFiles)} data-tooltip="Refresh Files">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                                        </svg>
-                                    </button>
-                                </div>
                                 <div id="header-title">
                                     <h1>{site_title}</h1>
                                 </div>
