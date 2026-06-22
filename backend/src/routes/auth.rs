@@ -42,7 +42,7 @@ where
 
         if let Some(ref pin) = config.pin {
             let jar = CookieJar::from_headers(&parts.headers);
-            let cookie_pin = jar.get("DUMBDROP_PIN").map(|c| c.value());
+            let cookie_pin = jar.get("RUSTDROP_PIN").map(|c| c.value());
             let header_pin = parts.headers.get("x-pin").and_then(|h| h.to_str().ok());
 
             let provided_pin = cookie_pin.or(header_pin);
@@ -130,7 +130,7 @@ async fn verify_pin(
     // 1. If PIN is not set in config, clear cookie and return success
     let Some(ref config_pin) = config.pin else {
         let new_jar = jar.add(
-            Cookie::build(("DUMBDROP_PIN", ""))
+            Cookie::build(("RUSTDROP_PIN", ""))
                 .path("/")
                 .build()
         );
@@ -196,7 +196,7 @@ async fn verify_pin(
         reset_attempts(&ip);
         
         // Build secure cookie
-        let secure_cookie = Cookie::build(("DUMBDROP_PIN", pin_str.clone()))
+        let secure_cookie = Cookie::build(("RUSTDROP_PIN", pin_str.clone()))
             .http_only(true)
             .secure(config.base_url.starts_with("https"))
             .same_site(cookie::SameSite::Strict)
@@ -241,7 +241,7 @@ async fn verify_pin(
 
 async fn logout(jar: CookieJar) -> impl IntoResponse {
     let new_jar = jar.add(
-        Cookie::build(("DUMBDROP_PIN", ""))
+        Cookie::build(("RUSTDROP_PIN", ""))
             .path("/")
             .build()
     );

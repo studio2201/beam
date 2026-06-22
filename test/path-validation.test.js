@@ -16,7 +16,7 @@ describe('Path Validation for Bind Mounts', () => {
 
   before(() => {
     // Create a temporary upload directory for testing
-    testUploadDir = path.join(os.tmpdir(), 'dumbdrop-test-uploads-' + Date.now());
+    testUploadDir = path.join(os.tmpdir(), 'rustdrop-test-uploads-' + Date.now());
     fs.mkdirSync(testUploadDir, { recursive: true });
   });
 
@@ -120,7 +120,7 @@ describe('Path Validation Edge Cases', () => {
   let testUploadDir;
 
   before(() => {
-    testUploadDir = path.join(os.tmpdir(), 'dumbdrop-edge-test-' + Date.now());
+    testUploadDir = path.join(os.tmpdir(), 'rustdrop-edge-test-' + Date.now());
     fs.mkdirSync(testUploadDir, { recursive: true });
   });
 

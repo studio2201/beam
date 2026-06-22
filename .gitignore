@@ -137,7 +137,7 @@ local_uploads/
 .idea/
 
 # Unraid template
-dumbdrop.xml
+rustdrop.xml
 
 # Icon conversion
 convert-icon.js

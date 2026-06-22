@@ -13,8 +13,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/dumbdrop.git
-   cd dumbdrop
+   git clone https://github.com/UberMetroid/RustDrop.git
+   cd RustDrop
    ```
 
 2. **Copy and configure environment variables**
@@ -28,7 +28,7 @@
      - `PORT=3000`
      - `LOCAL_UPLOAD_DIR=./local_uploads`
      - `MAX_FILE_SIZE=1024`
-     - `DUMBDROP_PIN=` (optional, for PIN protection)
+     - `RUSTDROP_PIN=` (optional, for PIN protection)
      - `APPRISE_URL=` (optional, for notifications)
 
 3. **Install dependencies**
@@ -45,7 +45,7 @@
 
    - You should see output like:
      ```
-     DumbDrop server running on http://localhost:3000
+     RustDrop server running on http://localhost:3000
      ```
 
 5. **Open the app**

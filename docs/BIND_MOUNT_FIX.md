@@ -2,7 +2,7 @@
 
 ## Problem
 
-Files uploaded to DumbDrop were disappearing when using Docker bind mounts (e.g., `-v ./uploads:/app/uploads`). The application only worked correctly with named Docker volumes.
+Files uploaded to RustDrop were disappearing when using Docker bind mounts (e.g., `-v ./uploads:/app/uploads`). The application only worked correctly with named Docker volumes.
 
 ### Root Cause
 
@@ -136,8 +136,8 @@ npm test -- test/path-validation.test.js
 
 ```yaml
 services:
-  dumbdrop:
-    image: dumbwareio/dumbdrop:latest
+  rustdrop:
+    image: ubermetroid/rustdrop:latest
     ports:
       - 3000:3000
     volumes:
@@ -150,15 +150,15 @@ services:
 
 ```yaml
 services:
-  dumbdrop:
-    image: dumbwareio/dumbdrop:latest
+  rustdrop:
+    image: ubermetroid/rustdrop:latest
     ports:
       - 3000:3000
     volumes:
-      - dumbdrop_uploads:/app/uploads # Named volume
+      - rustdrop_uploads:/app/uploads # Named volume
 
 volumes:
-  dumbdrop_uploads:
+  rustdrop_uploads:
 ```
 
 ### Verification Steps
@@ -203,8 +203,8 @@ The fix maintains security while improving compatibility:
 
 ## Related Commits
 
-- [d69a8b2](https://github.com/DumbWareio/DumbDrop/commit/d69a8b25b4008f0a5f037ae56d9647651554af11) - Previous attempt (caused the issue)
-- [fc8bff9](https://github.com/DumbWareio/DumbDrop/commit/fc8bff9a1422004d159e19bd5c698da77536a62f) - Related security improvements
+- [d69a8b2](https://github.com/UberMetroid/RustDrop/commit/d69a8b25b4008f0a5f037ae56d9647651554af11) - Previous attempt (caused the issue)
+- [fc8bff9](https://github.com/UberMetroid/RustDrop/commit/fc8bff9a1422004d159e19bd5c698da77536a62f) - Related security improvements
 
 ## Future Improvements
 

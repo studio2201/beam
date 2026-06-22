@@ -66,9 +66,8 @@ impl AppConfig {
             .map(|val| val == "true")
             .unwrap_or(false);
 
-        // Accept RUSTDROP_PIN or DUMBDROP_PIN or PIN
+        // Accept RUSTDROP_PIN or PIN
         let pin = env::var("RUSTDROP_PIN")
-            .or_else(|_| env::var("DUMBDROP_PIN"))
             .or_else(|_| env::var("PIN"))
             .ok()
             .filter(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()) && p.len() >= 4 && p.len() <= 10);
@@ -81,9 +80,8 @@ impl AppConfig {
             .ok()
             .map(|ips| ips.split(',').map(|ip| ip.trim().to_string()).collect());
 
-        // Accept RUSTDROP_TITLE or DUMBDROP_TITLE or SITE_TITLE
+        // Accept RUSTDROP_TITLE or SITE_TITLE
         let site_title = env::var("RUSTDROP_TITLE")
-            .or_else(|_| env::var("DUMBDROP_TITLE"))
             .or_else(|_| env::var("SITE_TITLE"))
             .unwrap_or_else(|_| "RustDrop".to_string());
 

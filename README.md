@@ -1,8 +1,8 @@
-# DumbDrop
+# RustDrop
 
-A stupid simple file upload application that provides a clean, modern interface for dragging and dropping files. Built with Node.js and vanilla JavaScript.
+A stupid simple file upload application that provides a clean, modern interface for dragging and dropping files. Built with Rust (Axum/Actix/Tokio backend and Yew/Trunk frontend).
 
-![DumbDrop](https://github.com/user-attachments/assets/1b909d26-9ead-4dc7-85bc-8bfda0d366c1)
+![RustDrop](https://github.com/user-attachments/assets/1b909d26-9ead-4dc7-85bc-8bfda0d366c1)
 
 No auth (unless you want it now!), no storage, no nothing. Just a simple file uploader to drop dumb files into a dumb folder.
 
@@ -25,7 +25,7 @@ No auth (unless you want it now!), no storage, no nothing. Just a simple file up
 
 ```bash
 # Pull and run with one command
-docker run -p 3000:3000 -v ./uploads:/app/uploads dumbwareio/dumbdrop:latest
+docker run -p 3000:3000 -v ./uploads:/app/uploads ubermetroid/rustdrop:latest
 ```
 
 1. Go to http://localhost:3000
@@ -38,8 +38,8 @@ Create a `docker-compose.yml` file:
 
 ```yaml
 services:
-  dumbdrop:
-    image: dumbwareio/dumbdrop:latest
+  rustdrop:
+    image: ubermetroid/rustdrop:latest
     ports:
       - 3000:3000
     volumes:
@@ -49,11 +49,11 @@ services:
       # Explicitly set upload directory inside the container
       UPLOAD_DIR: /app/uploads
       # The title shown in the web interface
-      DUMBDROP_TITLE: DumbDrop
+      RUSTDROP_TITLE: RustDrop
       # Maximum file size in MB
       MAX_FILE_SIZE: 1024
       # Optional PIN protection (leave empty to disable)
-      DUMBDROP_PIN: 123456
+      RUSTDROP_PIN: 123456
       # Upload without clicking button
       AUTO_UPLOAD: false
       # The base URL for the application
@@ -104,8 +104,8 @@ For local development setup, troubleshooting, and advanced usage, see the dedica
 | PORT                                                     | Server port                                                                                                                           | 3000                                                          | No       |
 | BASE_URL                                                 | Base URL for the application                                                                                                          | http://localhost:PORT                                         | No       |
 | MAX_FILE_SIZE                                            | Maximum file size in MB                                                                                                               | 1024                                                          | No       |
-| DUMBDROP_PIN                                             | PIN protection (4-10 digits)                                                                                                          | None                                                          | No       |
-| DUMBDROP_TITLE                                           | Site title displayed in header                                                                                                        | DumbDrop                                                      | No       |
+| RUSTDROP_PIN                                             | PIN protection (4-10 digits)                                                                                                          | None                                                          | No       |
+| RUSTDROP_TITLE                                           | Site title displayed in header                                                                                                        | RustDrop                                                      | No       |
 | APPRISE_URL                                              | Apprise URL for notifications                                                                                                         | None                                                          | No       |
 | APPRISE_MESSAGE                                          | Notification message template                                                                                                         | New file uploaded {filename} ({size}), Storage used {storage} | No       |
 | APPRISE_SIZE_UNIT                                        | Size unit for notifications (B, KB, MB, GB, TB, or Auto)                                                                              | Auto                                                          | No       |
@@ -121,7 +121,7 @@ For local development setup, troubleshooting, and advanced usage, see the dedica
 
 - **UPLOAD_DIR** is used in Docker/production. If not set, LOCAL_UPLOAD_DIR is used for local development. If neither is set, the default is `./local_uploads`.
 - **Docker Note:** The Dockerfile now only creates the `uploads` directory inside the container. The host's `./local_uploads` is mounted to `/app/uploads` and should be managed on the host system.
-- **BASE_URL**: If you are deploying DumbDrop under a subpath (e.g., `https://example.com/watchfolder/`), you **must** set `BASE_URL` to the full path including the trailing slash (e.g., `https://example.com/watchfolder/`). All API and asset requests will be prefixed with this value. If you deploy at the root, use `https://example.com/`.
+- **BASE_URL**: If you are deploying RustDrop under a subpath (e.g., `https://example.com/watchfolder/`), you **must** set `BASE_URL` to the full path including the trailing slash (e.g., `https://example.com/watchfolder/`). All API and asset requests will be prefixed with this value. If you deploy at the root, use `https://example.com/`.
 - **BASE_URL** must end with a trailing slash. The app will fail to start if this is not the case.
 
 See `.env.example` for a template and more details.
@@ -131,11 +131,11 @@ See `.env.example` for a template and more details.
 
 ### Important Security Notice
 
-By default, DumbDrop **does not** trust proxy headers like `X-Forwarded-For`. This prevents attackers from spoofing IP addresses to bypass rate limiting and PIN brute-force protection.
+By default, RustDrop **does not** trust proxy headers like `X-Forwarded-For`. This prevents attackers from spoofing IP addresses to bypass rate limiting and PIN brute-force protection.
 
 ### When to Enable TRUST_PROXY
 
-Only enable `TRUST_PROXY=true` if you are deploying DumbDrop behind a **trusted reverse proxy** such as:
+Only enable `TRUST_PROXY=true` if you are deploying RustDrop behind a **trusted reverse proxy** such as:
 
 - Nginx
 - Apache
@@ -172,7 +172,7 @@ TRUSTED_PROXY_IPS=172.17.0.1,10.0.0.1
 
 ⚠️ **DO NOT enable `TRUST_PROXY` if:**
 
-- DumbDrop is directly accessible from the internet
+- RustDrop is directly accessible from the internet
 - You are unsure whether you have a reverse proxy
 - You cannot verify the proxy IP addresses
 
@@ -323,17 +323,17 @@ Both {size} and {storage} use the same formatting rules based on APPRISE_SIZE_UN
 2. **Proxy Trust**: Only enable `TRUST_PROXY` when behind a verified reverse proxy
 3. **HTTPS**: Use HTTPS in production (handled by your reverse proxy)
 4. **File Extensions**: Restrict allowed file types using `ALLOWED_EXTENSIONS` if possible
-5. **Regular Updates**: Keep DumbDrop and its dependencies up to date
+5. **Regular Updates**: Keep RustDrop and its dependencies up to date
 
 ## Technical Details
 
 ### Stack
 
-- **Backend**: Node.js (>=20.0.0) with Express
-- **Frontend**: Vanilla JavaScript (ES6+)
+- **Backend**: Rust (Axum/Actix/Tokio)
+- **Frontend**: Rust (Yew with Trunk)
 - **Container**: Docker with multi-stage builds
-- **Security**: Express security middleware
-- **Upload**: Chunked file handling via Multer
+- **Security**: Rust security middlewares
+- **Upload**: Chunked file handling
 - **Notifications**: Apprise integration
 
 ### Dependencies
@@ -363,9 +363,9 @@ See [Local Development (Recommended Quick Start)](LOCAL_DEVELOPMENT.md) for loca
 
 ---
 
-Made with ❤️ by [DumbWare.io](https://dumbware.io)
+Made with ❤️ by [UberMetroid](https://github.com/UberMetroid)
 
 ## Future Features
 
 - Camera Upload for Mobile
-  > Got an idea? [Open an issue](https://github.com/dumbwareio/dumbdrop/issues) or [submit a PR](https://github.com/dumbwareio/dumbdrop/pulls)
+  > Got an idea? [Open an issue](https://github.com/UberMetroid/RustDrop/issues) or [submit a PR](https://github.com/UberMetroid/RustDrop/pulls)

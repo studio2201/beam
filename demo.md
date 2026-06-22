@@ -2,7 +2,7 @@
 
 ### Overview
 
-DumbDrop includes a demo mode that allows testing the application without actually storing files. Perfect for trying out the interface or development testing.
+RustDrop includes a demo mode that allows testing the application without actually storing files. Perfect for trying out the interface or development testing.
 
 ### Enabling Demo Mode
 

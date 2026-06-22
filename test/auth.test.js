@@ -5,7 +5,7 @@
 
 // Disable batch cleanup for tests
 process.env.DISABLE_BATCH_CLEANUP = 'true';
-process.env.DUMBDROP_PIN = '1234'; // Set PIN before requiring app/config
+process.env.RUSTDROP_PIN = '1234'; // Set PIN before requiring app/config
 
 const { describe, it, before, after, beforeEach } = require('node:test');
 const assert = require('node:assert');
@@ -16,7 +16,7 @@ const { app, initialize } = require('../src/app');
 
 let server;
 let baseUrl;
-const originalPin = process.env.DUMBDROP_PIN;
+const originalPin = process.env.RUSTDROP_PIN;
 
 before(async () => {
   // Initialize app
@@ -36,9 +36,9 @@ before(async () => {
 after(async () => {
   // Restore original PIN
   if (originalPin) {
-    process.env.DUMBDROP_PIN = originalPin;
+    process.env.RUSTDROP_PIN = originalPin;
   } else {
-    delete process.env.DUMBDROP_PIN;
+    delete process.env.RUSTDROP_PIN;
   }
 
   // Close server

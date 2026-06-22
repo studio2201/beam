@@ -90,7 +90,7 @@ async fn serve_index(
     jar: CookieJar,
 ) -> impl IntoResponse {
     if let Some(ref pin) = config.pin {
-        let cookie_pin = jar.get("DUMBDROP_PIN").map(|c| c.value());
+        let cookie_pin = jar.get("RUSTDROP_PIN").map(|c| c.value());
         let mut authenticated = false;
         if let Some(provided) = cookie_pin {
             if crate::security::safe_compare(provided, pin) {
