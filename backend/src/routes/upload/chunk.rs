@@ -13,7 +13,7 @@ use crate::config::AppConfig;
 use crate::routes::auth::RequirePin;
 use crate::routes::upload::UploadState;
 use crate::routes::upload::metadata::{
-    read_upload_metadata, write_upload_metadata, delete_upload_metadata
+    read_upload_metadata, delete_upload_metadata
 };
 
 pub async fn upload_chunk(
@@ -29,12 +29,24 @@ pub async fn upload_chunk(
         return (StatusCode::BAD_REQUEST, Json(json!({ "error": "Empty chunk received" }))).into_response();
     }
     
-    let mut metadata = match read_upload_metadata(&config.upload_dir, &upload_id).await {
+    let cached_metadata = {
+        let active = state.active_uploads.lock().unwrap();
+        active.get(&upload_id).cloned()
+    };
+    
+    let mut metadata = match cached_metadata {
         Some(m) => m,
-        None => {
-            let client_batch_id = headers.get("x-batch-id").and_then(|h| h.to_str().ok()).unwrap_or("none");
-            tracing::warn!("Upload metadata not found for chunk request: {}. Client Batch ID: {}.", upload_id, client_batch_id);
-            return (StatusCode::NOT_FOUND, Json(json!({ "error": "Upload session not found or already completed" }))).into_response();
+        None => match read_upload_metadata(&config.upload_dir, &upload_id).await {
+            Some(m) => {
+                let mut active = state.active_uploads.lock().unwrap();
+                active.insert(upload_id.clone(), m.clone());
+                m
+            }
+            None => {
+                let client_batch_id = headers.get("x-batch-id").and_then(|h| h.to_str().ok()).unwrap_or("none");
+                tracing::warn!("Upload metadata not found for chunk request: {}. Client Batch ID: {}.", upload_id, client_batch_id);
+                return (StatusCode::NOT_FOUND, Json(json!({ "error": "Upload session not found or already completed" }))).into_response();
+            }
         }
     };
     
@@ -52,6 +64,10 @@ pub async fn upload_chunk(
             }
         }
         delete_upload_metadata(&config.upload_dir, &upload_id).await;
+        {
+            let mut active = state.active_uploads.lock().unwrap();
+            active.remove(&upload_id);
+        }
         return Json(json!({ "bytesReceived": metadata.file_size, "progress": 100 })).into_response();
     }
     
@@ -102,8 +118,10 @@ pub async fn upload_chunk(
     
     tracing::debug!("Chunk written for {}: {}/{} ({}%)", upload_id, metadata.bytes_received, metadata.file_size, progress);
     
-    if let Err(e) = write_upload_metadata(&config.upload_dir, &upload_id, metadata.clone()).await {
-        tracing::error!("Failed to save metadata update: {}", e);
+    metadata.last_activity = chrono::Utc::now().timestamp_millis() as u64;
+    {
+        let mut active = state.active_uploads.lock().unwrap();
+        active.insert(upload_id.clone(), metadata.clone());
     }
     
     if metadata.bytes_received >= metadata.file_size {
@@ -115,6 +133,10 @@ pub async fn upload_chunk(
             Ok(_) => {
                 tracing::info!("Upload completed and finalized: {} as {:?}", metadata.original_filename, final_path);
                 delete_upload_metadata(&config.upload_dir, &upload_id).await;
+                {
+                    let mut active = state.active_uploads.lock().unwrap();
+                    active.remove(&upload_id);
+                }
                 
                 let config_clone = config.clone();
                 let filename_clone = metadata.original_filename.clone();
@@ -127,6 +149,10 @@ pub async fn upload_chunk(
                 if e.kind() == std::io::ErrorKind::NotFound {
                     tracing::warn!("Partial file {:?} missing during finalization, assuming completed elsewhere.", partial_path);
                     delete_upload_metadata(&config.upload_dir, &upload_id).await;
+                    {
+                        let mut active = state.active_uploads.lock().unwrap();
+                        active.remove(&upload_id);
+                    }
                 } else {
                     tracing::error!("CRITICAL: Failed to rename partial file {:?} to {:?}: {}", partial_path, final_path, e);
                 }
@@ -139,17 +165,32 @@ pub async fn upload_chunk(
 
 pub async fn cancel_upload(
     State(config): State<Arc<AppConfig>>,
+    State(state): State<Arc<UploadState>>,
     Path(upload_id): Path<String>,
 ) -> impl IntoResponse {
     tracing::info!("Received cancel request for upload: {}", upload_id);
     
-    if let Some(metadata) = read_upload_metadata(&config.upload_dir, &upload_id).await {
+    let metadata = {
+        let active = state.active_uploads.lock().unwrap();
+        active.get(&upload_id).cloned()
+    };
+    
+    let metadata = match metadata {
+        Some(m) => Some(m),
+        None => read_upload_metadata(&config.upload_dir, &upload_id).await,
+    };
+    
+    if let Some(metadata) = metadata {
         let partial_path = StdPath::new(&metadata.partial_file_path);
         if partial_path.exists() {
             let _ = tokio::fs::remove_file(partial_path).await;
             tracing::info!("Deleted partial file on cancellation: {:?}", partial_path);
         }
         delete_upload_metadata(&config.upload_dir, &upload_id).await;
+        {
+            let mut active = state.active_uploads.lock().unwrap();
+            active.remove(&upload_id);
+        }
         tracing::info!("Upload cancelled and cleaned up: {} ({})", upload_id, metadata.original_filename);
     } else {
         tracing::warn!("Cancel request for non-existent or already completed upload: {}", upload_id);

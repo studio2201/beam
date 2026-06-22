@@ -180,17 +180,30 @@ pub async fn init_upload(
         return (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "Failed to initialize upload" }))).into_response();
     }
     
+    {
+        let mut active = state.active_uploads.lock().unwrap();
+        active.insert(upload_id.clone(), metadata.clone());
+    }
+    
     tracing::info!("Initialized persistent upload: {} for {} -> {:?}", upload_id, payload.filename, final_file_path);
     
     if size == 0 {
         if let Err(e) = fs::write(&final_file_path, "") {
             tracing::error!("Failed to create zero-byte file {:?}: {}", final_file_path, e);
             delete_upload_metadata(&config.upload_dir, &upload_id).await;
+            {
+                let mut active = state.active_uploads.lock().unwrap();
+                active.remove(&upload_id);
+            }
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "Failed to complete zero-byte upload" }))).into_response();
         }
         
         tracing::info!("Completed zero-byte file upload: {} as {:?}", payload.filename, final_file_path);
         delete_upload_metadata(&config.upload_dir, &upload_id).await;
+        {
+            let mut active = state.active_uploads.lock().unwrap();
+            active.remove(&upload_id);
+        }
         
         let config_clone = config.clone();
         let filename_clone = payload.filename.clone();
