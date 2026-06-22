@@ -1,16 +1,16 @@
-mod metadata;
-mod init;
+mod cancel;
 mod chunk;
+mod init;
+mod metadata;
+mod utils;
 
-use axum::{
-    routing::post,
-    Router,
-};
+use axum::{Router, routing::post};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+use self::cancel::cancel_upload;
+use self::chunk::upload_chunk;
 use self::init::init_upload;
-use self::chunk::{upload_chunk, cancel_upload};
 
 pub fn router() -> Router<crate::AppState> {
     Router::new()
@@ -23,6 +23,7 @@ pub struct UploadState {
     pub folder_mappings: Mutex<HashMap<String, String>>,
     pub batch_activity: Mutex<HashMap<String, std::time::Instant>>,
     pub active_uploads: Mutex<HashMap<String, self::metadata::UploadMetadata>>,
+    pub file_handles: Mutex<HashMap<String, Arc<tokio::sync::Mutex<tokio::fs::File>>>>,
 }
 
 impl UploadState {
@@ -31,6 +32,7 @@ impl UploadState {
             folder_mappings: Mutex::new(HashMap::new()),
             batch_activity: Mutex::new(HashMap::new()),
             active_uploads: Mutex::new(HashMap::new()),
+            file_handles: Mutex::new(HashMap::new()),
         }
     }
 }
@@ -39,7 +41,11 @@ fn run_retention_cleanup(upload_dir: &std::path::Path, retention_days: u64) {
     let max_age = std::time::Duration::from_secs(retention_days * 24 * 60 * 60);
     let now = std::time::SystemTime::now();
 
-    fn clean_dir(dir: &std::path::Path, max_age: std::time::Duration, now: std::time::SystemTime) -> bool {
+    fn clean_dir(
+        dir: &std::path::Path,
+        max_age: std::time::Duration,
+        now: std::time::SystemTime,
+    ) -> bool {
         let mut is_empty = true;
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
@@ -64,9 +70,16 @@ fn run_retention_cleanup(upload_dir: &std::path::Path, retention_days: u64) {
                         if let Ok(modified) = metadata.modified() {
                             if let Ok(age) = now.duration_since(modified) {
                                 if age > max_age {
-                                    tracing::info!("Auto-retention: deleting expired file {:?}", path);
+                                    tracing::info!(
+                                        "Auto-retention: deleting expired file {:?}",
+                                        path
+                                    );
                                     if let Err(e) = std::fs::remove_file(&path) {
-                                        tracing::error!("Failed to delete expired file {:?}: {}", path, e);
+                                        tracing::error!(
+                                            "Failed to delete expired file {:?}: {}",
+                                            path,
+                                            e
+                                        );
                                         is_empty = false;
                                     }
                                 } else {
@@ -101,12 +114,14 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
                 let dir = config.upload_dir.clone();
                 tokio::task::spawn_blocking(move || {
                     run_retention_cleanup(&dir, days);
-                }).await.ok();
+                })
+                .await
+                .ok();
             }
 
             let now = std::time::Instant::now();
             let timeout = std::time::Duration::from_secs(30 * 60);
-            
+
             let mut expired_batches = Vec::new();
             {
                 let activity = state.batch_activity.lock().unwrap();
@@ -116,12 +131,15 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
                     }
                 }
             }
-            
+
             if !expired_batches.is_empty() {
-                tracing::info!("Cleaning up {} inactive batch sessions", expired_batches.len());
+                tracing::info!(
+                    "Cleaning up {} inactive batch sessions",
+                    expired_batches.len()
+                );
                 let mut activity = state.batch_activity.lock().unwrap();
                 let mut mappings = state.folder_mappings.lock().unwrap();
-                
+
                 for batch_id in expired_batches {
                     activity.remove(&batch_id);
                     mappings.retain(|key, _| !key.ends_with(&format!("-{}", batch_id)));
@@ -133,19 +151,26 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
             {
                 let active = state.active_uploads.lock().unwrap();
                 for (upload_id, meta) in active.iter() {
-                    let last_activity_time = std::time::UNIX_EPOCH + std::time::Duration::from_millis(meta.last_activity);
-                    if let Ok(duration) = std::time::SystemTime::now().duration_since(last_activity_time) {
-                        if duration >= timeout {
-                            expired_uploads.push(upload_id.clone());
-                        }
+                    let last_activity_time = std::time::UNIX_EPOCH
+                        + std::time::Duration::from_millis(meta.last_activity);
+                    if let Ok(duration) =
+                        std::time::SystemTime::now().duration_since(last_activity_time)
+                        && duration >= timeout
+                    {
+                        expired_uploads.push(upload_id.clone());
                     }
                 }
             }
             if !expired_uploads.is_empty() {
-                tracing::info!("Cleaning up {} expired cached uploads", expired_uploads.len());
+                tracing::info!(
+                    "Cleaning up {} expired cached uploads",
+                    expired_uploads.len()
+                );
                 let mut active = state.active_uploads.lock().unwrap();
+                let mut handles = state.file_handles.lock().unwrap();
                 for upload_id in expired_uploads {
                     active.remove(&upload_id);
+                    handles.remove(&upload_id);
                 }
             }
         }

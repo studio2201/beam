@@ -30,12 +30,12 @@ impl AppConfig {
         let port: u16 = env::var("PORT")
             .ok()
             .and_then(|p| p.parse().ok())
-            .unwrap_or(3000);
+            .unwrap_or(4401);
 
         let node_env = env::var("NODE_ENV").unwrap_or_else(|_| "production".to_string());
 
-        let mut base_url = env::var("BASE_URL")
-            .unwrap_or_else(|_| format!("http://localhost:{}", port));
+        let mut base_url =
+            env::var("BASE_URL").unwrap_or_else(|_| format!("http://localhost:{}", port));
         if !base_url.ends_with('/') {
             base_url.push('/');
         }
@@ -58,7 +58,9 @@ impl AppConfig {
         let max_file_size = env::var("MAX_FILE_SIZE")
             .ok()
             .and_then(|s| s.parse::<u64>().ok())
-            .unwrap_or(1024) * 1024 * 1024; // MB to bytes
+            .unwrap_or(1024)
+            * 1024
+            * 1024; // MB to bytes
 
         let auto_upload = env::var("AUTO_UPLOAD")
             .map(|val| val == "true")
@@ -72,7 +74,12 @@ impl AppConfig {
         let pin = env::var("RUSTDROP_PIN")
             .or_else(|_| env::var("PIN"))
             .ok()
-            .filter(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()) && p.len() >= 4 && p.len() <= 10);
+            .filter(|p| {
+                !p.is_empty()
+                    && p.chars().all(|c| c.is_ascii_digit())
+                    && p.len() >= 4
+                    && p.len() <= 10
+            });
 
         let trust_proxy = env::var("TRUST_PROXY")
             .map(|val| val == "true")
@@ -89,8 +96,9 @@ impl AppConfig {
 
         let apprise_url = env::var("APPRISE_URL").ok().filter(|s| !s.is_empty());
 
-        let apprise_message = env::var("APPRISE_MESSAGE")
-            .unwrap_or_else(|_| "New file uploaded - {filename} ({size}), Storage used {storage}".to_string());
+        let apprise_message = env::var("APPRISE_MESSAGE").unwrap_or_else(|_| {
+            "New file uploaded - {filename} ({size}), Storage used {storage}".to_string()
+        });
 
         let apprise_size_unit = env::var("APPRISE_SIZE_UNIT").ok().filter(|s| !s.is_empty());
 

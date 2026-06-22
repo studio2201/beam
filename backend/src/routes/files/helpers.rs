@@ -28,31 +28,34 @@ pub enum FileItem {
     },
 }
 
-pub fn get_directory_contents(dir_path: &StdPath, relative_path: &str) -> std::io::Result<Vec<FileItem>> {
+pub fn get_directory_contents(
+    dir_path: &StdPath,
+    relative_path: &str,
+) -> std::io::Result<Vec<FileItem>> {
     let mut items = Vec::new();
-    
+
     if !dir_path.exists() {
         return Ok(items);
     }
-    
+
     let entries = fs::read_dir(dir_path)?;
     for entry in entries.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
-        
+
         if name == ".metadata" || name.starts_with('.') {
             continue;
         }
-        
+
         let full_path = entry.path();
         let item_relative_path = if relative_path.is_empty() {
             name.clone()
         } else {
             format!("{}/{}", relative_path, name)
         };
-        
+
         let metadata = entry.metadata()?;
         let upload_date: DateTime<Utc> = metadata.modified()?.into();
-        
+
         if metadata.is_dir() {
             let children = get_directory_contents(&full_path, &item_relative_path)?;
             let size = calculate_total_size(&children);
@@ -71,7 +74,7 @@ pub fn get_directory_contents(dir_path: &StdPath, relative_path: &str) -> std::i
                 .and_then(|e| e.to_str())
                 .map(|e| format!(".{}", e.to_lowercase()))
                 .unwrap_or_default();
-                
+
             items.push(FileItem::File {
                 name,
                 path: item_relative_path,
@@ -82,7 +85,7 @@ pub fn get_directory_contents(dir_path: &StdPath, relative_path: &str) -> std::i
             });
         }
     }
-    
+
     items.sort_by(|a, b| {
         let a_type = match a {
             FileItem::Directory { .. } => 0,
@@ -92,7 +95,7 @@ pub fn get_directory_contents(dir_path: &StdPath, relative_path: &str) -> std::i
             FileItem::Directory { .. } => 0,
             FileItem::File { .. } => 1,
         };
-        
+
         if a_type != b_type {
             a_type.cmp(&b_type)
         } else {
@@ -105,22 +108,28 @@ pub fn get_directory_contents(dir_path: &StdPath, relative_path: &str) -> std::i
             a_name.cmp(b_name)
         }
     });
-    
+
     Ok(items)
 }
 
 pub fn calculate_total_size(items: &[FileItem]) -> u64 {
-    items.iter().map(|item| match item {
-        FileItem::File { size, .. } => *size,
-        FileItem::Directory { size, .. } => *size,
-    }).sum()
+    items
+        .iter()
+        .map(|item| match item {
+            FileItem::File { size, .. } => *size,
+            FileItem::Directory { size, .. } => *size,
+        })
+        .sum()
 }
 
 pub fn count_files(items: &[FileItem]) -> u64 {
-    items.iter().map(|item| match item {
-        FileItem::File { .. } => 1,
-        FileItem::Directory { children, .. } => count_files(children),
-    }).sum()
+    items
+        .iter()
+        .map(|item| match item {
+            FileItem::File { .. } => 1,
+            FileItem::Directory { children, .. } => count_files(children),
+        })
+        .sum()
 }
 
 pub fn create_safe_content_disposition(filename: &str) -> String {
@@ -129,21 +138,34 @@ pub fn create_safe_content_disposition(filename: &str) -> String {
         .and_then(|n| n.to_str())
         .unwrap_or(filename);
 
-    let sanitized: String = basename.chars()
-        .map(|c| if c.is_ascii_control() || c == '"' || c == '\\' { '_' } else { c })
+    let sanitized: String = basename
+        .chars()
+        .map(|c| {
+            if c.is_ascii_control() || c == '"' || c == '\\' {
+                '_'
+            } else {
+                c
+            }
+        })
         .collect();
 
-    let is_ascii_printable = sanitized.chars().all(|c| c >= ' ' && c <= '~');
+    let is_ascii_printable = sanitized.chars().all(|c| (' '..='~').contains(&c));
 
     if is_ascii_printable {
         let escaped = sanitized.replace('\\', "\\\\").replace('"', "\\\"");
         format!("inline; filename=\"{}\"", escaped)
     } else {
-        let encoded = percent_encoding::utf8_percent_encode(&sanitized, percent_encoding::NON_ALPHANUMERIC).to_string();
-        let ascii_safe: String = sanitized.chars()
-            .map(|c| if c >= ' ' && c <= '~' { c } else { '_' })
+        let encoded =
+            percent_encoding::utf8_percent_encode(&sanitized, percent_encoding::NON_ALPHANUMERIC)
+                .to_string();
+        let ascii_safe: String = sanitized
+            .chars()
+            .map(|c| if (' '..='~').contains(&c) { c } else { '_' })
             .collect();
-        format!("inline; filename=\"{}\"; filename*=UTF-8''{}", ascii_safe, encoded)
+        format!(
+            "inline; filename=\"{}\"; filename*=UTF-8''{}",
+            ascii_safe, encoded
+        )
     }
 }
 

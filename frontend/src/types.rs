@@ -59,12 +59,7 @@ pub struct UploadProgress {
     pub error_color: Option<String>,
 }
 
-#[derive(Clone, Debug)]
-pub struct Toast {
-    pub id: usize,
-    pub message: String,
-    pub toast_type: String, // "success" | "error" | "info"
-}
+
 
 #[derive(Clone, Debug)]
 pub struct RenameData {
@@ -72,45 +67,58 @@ pub struct RenameData {
     pub current_name: String,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Language {
+    English,
+    Chinese,
+    Spanish,
+    German,
+    Japanese,
+    French,
+    Portuguese,
+    Russian,
+}
+
 pub enum Msg {
     Nothing,
-    
+
     // Core Configuration & Theme
     LoadConfig(Result<FrontendConfig, String>),
     ToggleTheme,
-    
+    SwitchLanguage(Language),
+
     // Authentication / PIN digits
     PinInputChanged(String),
     VerifyPin,
     PinVerificationResult(Result<bool, String>),
     Logout,
-    
+
     // Upload interaction
     DragOver(bool),
     FilesSelected(Vec<web_sys::File>),
     FoldersSelected(Vec<web_sys::File>),
     DropProcessed(Result<Vec<web_sys::File>, String>),
     StartUploads,
-    
+
     // Upload callbacks from async tasks
     UploadInit(String, String), // path, upload_id
     UploadProgressUpdate(String, u64, f64, String, Option<String>), // path, uploaded_bytes, rate, status, error_color
-    UploadCompleted(String), // path
-    UploadFailed(String, String), // path, error
-    
+    UploadCompleted(String),                                        // path
+    UploadFailed(String, String),                                   // path, error
+
     // Loaded files interaction
     LoadFileList(Result<FileListResponse, String>),
     RefreshFiles,
     DeleteFile(String),
     DeleteResult(Result<String, String>),
-    
+
     // Rename Modal
     StartRename(String, String), // path, current_name
     CancelRename,
     ConfirmRename,
     RenameInputChanged(String),
     RenameResult(Result<String, String>),
-    
+
     // Toast alerts
     AddToast(String, String), // message, type
     RemoveToast(usize),

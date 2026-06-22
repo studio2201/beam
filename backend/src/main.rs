@@ -1,16 +1,18 @@
 mod config;
+mod routes;
 mod security;
 mod services;
 mod utils;
-mod routes;
+#[cfg(test)]
+mod tests;
 
-use axum::{
-    extract::{State, FromRef},
-    routing::get,
-    response::{IntoResponse, Response, Redirect},
-    Extension, Router,
-};
 use axum::http::StatusCode;
+use axum::{
+    Extension, Router,
+    extract::{FromRef, State},
+    response::{IntoResponse, Redirect, Response},
+    routing::get,
+};
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
@@ -40,7 +42,9 @@ impl FromRef<AppState> for Arc<UploadState> {
 #[tokio::main]
 async fn main() {
     tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
+        )
         .with(tracing_subscriber::fmt::layer())
         .init();
 
@@ -68,7 +72,10 @@ async fn main() {
         .route("/index.html", get(serve_index))
         .route("/login.html", get(serve_login))
         .fallback_service(tower_http::services::ServeDir::new("frontend/dist"))
-        .layer(axum::middleware::from_fn_with_state(app_state.clone(), hsts_middleware))
+        .layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            hsts_middleware,
+        ))
         .layer(tower_http::cors::CorsLayer::permissive())
         .layer(Extension(config.clone()))
         .with_state(app_state);
@@ -78,14 +85,15 @@ async fn main() {
     tracing::info!("Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app.into_make_service_with_connect_info::<std::net::SocketAddr>())
-        .await
-        .unwrap();
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await
+    .unwrap();
 }
 
-async fn serve_index(
-    State(config): State<Arc<AppConfig>>,
-) -> impl IntoResponse {
+async fn serve_index(State(config): State<Arc<AppConfig>>) -> impl IntoResponse {
     serve_html(config, "index.html").await.into_response()
 }
 
@@ -93,10 +101,7 @@ async fn serve_login() -> impl IntoResponse {
     Redirect::temporary("/")
 }
 
-async fn serve_html(
-    config: Arc<AppConfig>,
-    req_path: &str,
-) -> Response {
+async fn serve_html(config: Arc<AppConfig>, req_path: &str) -> Response {
     let file_path = Path::new("frontend/dist/index.html");
     let content = match tokio::fs::read_to_string(&file_path).await {
         Ok(c) => c,
@@ -146,7 +151,11 @@ fn generate_pwa_manifest(config: &AppConfig) {
             for entry in entries.flatten() {
                 let name = entry.file_name().to_string_lossy().to_string();
                 let full = entry.path();
-                let rel = if base.is_empty() { name.clone() } else { format!("{}/{}", base, name) };
+                let rel = if base.is_empty() {
+                    name.clone()
+                } else {
+                    format!("{}/{}", base, name)
+                };
                 if full.is_dir() {
                     walk_dir(&full, &rel, assets);
                 } else {
@@ -156,12 +165,12 @@ fn generate_pwa_manifest(config: &AppConfig) {
         }
     }
     walk_dir(Path::new("frontend/dist"), "", &mut manifest_assets);
-    
+
     let asset_path = Path::new("frontend/dist/asset-manifest.json");
     if let Ok(json) = serde_json::to_string_pretty(&manifest_assets) {
         let _ = fs::write(asset_path, json);
     }
-    
+
     let pwa_manifest = serde_json::json!({
         "name": &config.site_title,
         "short_name": &config.site_title,
@@ -184,7 +193,7 @@ fn generate_pwa_manifest(config: &AppConfig) {
         ],
         "orientation": "any"
     });
-    
+
     let pwa_path = Path::new("frontend/dist/manifest.json");
     if let Ok(json) = serde_json::to_string_pretty(&pwa_manifest) {
         let _ = fs::write(pwa_path, json);

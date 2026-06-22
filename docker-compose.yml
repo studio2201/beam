@@ -1,16 +1,17 @@
 services:
   rustdrop:
+    build: .
     image: ubermetroid/rustdrop:latest
     container_name: rustdrop
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - ${RUSTDROP_PORT:-4401}:4401
     volumes:
-      # Replace "./local_uploads" (before the colon) with the path where the files should land on your host
-      - ./uploads:/app/uploads
+      - ${RUSTDROP_UPLOADS_PATH:-./uploads}:/usr/src/app/uploads
+      - ${RUSTDROP_DATA_PATH:-./data}:/usr/src/app/data
     environment:
-      # Explicitly set upload directory inside the container
-      UPLOAD_DIR: /app/uploads
+      # Explicitly set directories inside the container
+      UPLOAD_DIR: /usr/src/app/uploads
       
       # The site title shown in the web interface
       RUSTDROP_TITLE: RustDrop
@@ -19,27 +20,16 @@ services:
       MAX_FILE_SIZE: 1024
       
       # Optional PIN protection (4-10 digits, leave empty to disable)
-      RUSTDROP_PIN: 123456
+      RUSTDROP_PIN: ${RUSTDROP_PIN:-123456}
       
       # Start uploading immediately upon file selection (true/false)
       AUTO_UPLOAD: "true"
       
       # The base URL for the application (must end with a trailing slash)
-      BASE_URL: http://localhost:3000/
+      BASE_URL: ${RUSTDROP_BASE_URL:-http://localhost:4401/}
       
       # Enable file listing, download, and deletion in the explorer UI (true/false)
       SHOW_FILE_LIST: "true"
-
-      # Additional available environment variables (commented out with defaults)
-      # PORT: 3000  # Server port (default: 3000)
-      # NODE_ENV: production  # Environment (development/production)
-      # MAX_STORAGE_LIMIT_GB: 10  # Optional: Total storage limit for uploads directory in GB
-      # RETENTION_PERIOD_DAYS: 7  # Optional: Automatically delete files older than X days
-      # APPRISE_URL: ""  # Apprise notification URL (e.g. tgram://bottoken/chatid)
-      # APPRISE_MESSAGE: "New file uploaded - {filename} ({size}), Storage used {storage}"  # Message template
-      # APPRISE_SIZE_UNIT: "Auto"  # Size formatting unit (B, KB, MB, GB, TB, or Auto)
-      # ALLOWED_EXTENSIONS: ".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt"  # Comma-separated list of allowed file extensions
-
-      # Reverse Proxy / Security Settings
-      # TRUST_PROXY: "false"  # Set to 'true' ONLY if behind a trusted reverse proxy (Nginx, Cloudflare, etc.)
-      # TRUSTED_PROXY_IPS: 172.17.0.1,10.0.0.1  # Optional: Comma-separated list of trusted proxy IPs
+      
+      PORT: 4401
+      NODE_ENV: production

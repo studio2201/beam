@@ -6,36 +6,109 @@
   <img src="https://img.shields.io/github/actions/workflow/status/UberMetroid/RustDrop/docker-publish.yml" alt="GitHub Actions Workflow Status" />
 </p>
 
-A stupid simple file upload application that provides a clean, modern interface for dragging and dropping files. Built with Rust (Axum/Tokio backend and Yew/Trunk WebAssembly frontend).
+---
+
+## Overview
+
+RustDrop is a lightweight, self-hosted, and high-performance file sharing web application. It features a modern, drag-and-drop web interface for uploading files and folders while maintaining their directory structures. The application is built from the ground up to be safe, reliable, and highly resource-efficient by combining an Axum/Tokio Rust backend with a Yew/WebAssembly frontend.
 
 ---
 
 ## Features
 
-- 🚀 **Drag and Drop**: Smooth drag-and-drop uploading for files and folders (maintaining directory structure).
-- 🎨 **Minimalist Design**: Responsive interface with system theme sync (Light, Dark, Sepia, Nord, Dracula).
-- 📂 **File Listing**: Option to list, download, and delete uploaded files right from the UI.
-- 🔒 **PIN Security**: Lock down your uploader with an optional 4-10 digit PIN.
-- 🛡️ **Security Built-in**: Constant-time PIN comparisons, brute-force IP lockout protection, and trusted reverse-proxy IP checks.
-- 🔔 **Upload Notifications**: Receive instant notifications on Discord, Telegram, or other services via Apprise.
+*   🚀 **Drag and Drop**: Recursive folder and file uploading while maintaining original directory structures.
+*   🎨 **Minimalist Design**: Zero-tracker interface with light, dark, sepia, nord, and dracula theme synchronization.
+*   🔒 **Optional PIN Security**: Lock down uploads behind a 4-to-10 digit PIN.
+*   🛡️ **Built-in Protection**: Constant-time PIN comparisons (`constant_time_eq`) to prevent timing attacks, and automatic IP brute-force lockout.
+*   🌐 **Reverse Proxy Aware**: Securely parses and normalizes client IPs behind Nginx, Cloudflare, etc., via proxy trust settings.
+*   📦 **Flexible Storage Limits**: Enforce maximum storage ceilings (GB) and retention rules (prune files older than X days).
+*   🔔 **Instant notifications**: Connect uploads to 100+ services (Discord, Telegram, Slack, etc.) using Apprise.
+
+---
+
+## Prerequisites & Environment Variables
+
+### System Prerequisites
+*   **Compilation Environment**: Rust Toolchain 1.80+ installed.
+*   **WebAssembly Target**: `wasm32-unknown-unknown` target.
+*   **Frontend Bundler**: `trunk` binary installed.
+*   **Notification Engine**: `apprise` binary installed and accessible in the system PATH (if notifications are used).
+
+### Environment Variables
+
+Configure these settings inside a `.env` file at the project root or inject them directly into your runtime environment:
+
+| Variable | Description | Default | Status |
+| :--- | :--- | :--- | :--- |
+| `PORT` | Port the web server listens on. | `3000` | Optional |
+| `BASE_URL` | Application base URL (must end with a `/`). | `http://localhost:PORT/` | Optional |
+| `UPLOAD_DIR` | Main directory path where uploaded files are stored. | `./local_uploads` | Optional |
+| `LOCAL_UPLOAD_DIR` | Fallback directory path if `UPLOAD_DIR` is empty or unset. | `./local_uploads` | Optional |
+| `MAX_FILE_SIZE` | Maximum file size limit in MB. | `1024` (1GB) | Optional |
+| `AUTO_UPLOAD` | Start uploading immediately upon dragging files. | `false` | Optional |
+| `SHOW_FILE_LIST` | Enable file explorer listing/deletion interface. | `false` | Optional |
+| `RUSTDROP_PIN` | 4-10 digit PIN (numerical only) for upload protection. | None | Optional |
+| `PIN` | Alias for `RUSTDROP_PIN`. | None | Optional |
+| `RUSTDROP_TITLE` | Site title shown in headers and browser tab. | `RustDrop` | Optional |
+| `SITE_TITLE` | Alias for `RUSTDROP_TITLE`. | `RustDrop` | Optional |
+| `TRUST_PROXY` | Set `true` if backend is hosted behind a reverse proxy. | `false` | Optional |
+| `TRUSTED_PROXY_IPS` | Comma-separated IP list of trusted upstream proxies. | None | Optional |
+| `MAX_STORAGE_LIMIT_GB` | Maximum capacity limit for upload directory in GB. | None | Optional |
+| `RETENTION_PERIOD_DAYS` | Automatically delete files older than this many days. | None | Optional |
+| `APPRISE_URL` | Webhook URL for Apprise alerts (e.g. `discord://webhookid/token`). | None | Optional |
+| `APPRISE_MESSAGE` | Alert message template. Supports `{filename}`, `{size}`, `{storage}`. | See below | Optional |
+| `APPRISE_SIZE_UNIT` | Size format unit for notifications (B, KB, MB, GB, TB, or Auto). | `Auto` | Optional |
+| `ALLOWED_EXTENSIONS` | Comma-separated list of allowed file extensions (e.g. `.png,.pdf`). | None (All) | Optional |
+| `CLIENT_MAX_RETRIES` | Max network retry attempts client-side before failing an upload. | `5` | Optional |
+
+> **Note**: Default Apprise message is: `"New file uploaded - {filename} ({size}), Storage used {storage}"`.
 
 ---
 
 ## Quick Start
 
-### Docker (Recommended)
+Spin up your environment locally using one of the two execution paths below:
+
+### Path A: Local Development (Build from Source)
+This method is recommended for customizing code or testing locally:
 
 ```bash
-docker run -d -p 3000:3000 -v ./uploads:/app/uploads -e RUSTDROP_PIN=1234 ubermetroid/rustdrop:latest
+# 1. Add WASM target and install Trunk
+rustup target add wasm32-unknown-unknown
+cargo install --locked trunk
+
+# 2. Configure environment values
+cp .env.example .env
+
+# 3. Build & bundle the WebAssembly frontend
+cd frontend
+trunk build --release
+cd ..
+
+# 4. Compile and start the backend HTTP server
+cargo run --release --bin backend
 ```
 
-1. Go to `http://localhost:3000`
-2. Enter PIN `1234`
-3. Drag & drop files to upload! They will save in `./uploads` on your host.
+Access the app at [http://localhost:3000](http://localhost:3000).
 
-### Docker Compose
+### Path B: Production Container (Docker Run)
+Run RustDrop immediately without configuring compilation toolchains:
 
-Create a `docker-compose.yml` file:
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -v ./uploads:/app/uploads \
+  -e RUSTDROP_PIN=123456 \
+  -e SHOW_FILE_LIST=true \
+  ubermetroid/rustdrop:latest
+```
+
+---
+
+## Docker & Docker Compose Configurations
+
+### Docker Compose Setup
+For a robust, persistent service layout, create a `docker-compose.yml` file:
 
 ```yaml
 services:
@@ -49,101 +122,130 @@ services:
       - ./uploads:/app/uploads
     environment:
       UPLOAD_DIR: /app/uploads
-      BASE_URL: http://localhost:3000
+      BASE_URL: http://localhost:3000/
       RUSTDROP_TITLE: RustDrop
-      RUSTDROP_PIN: 123456 # Leave empty to disable auth
-      MAX_FILE_SIZE: 1024 # In MB
+      MAX_FILE_SIZE: 1024
+      RUSTDROP_PIN: 123456
       AUTO_UPLOAD: "true"
       SHOW_FILE_LIST: "true"
 ```
 
-Start the container:
+Start the service container:
 ```bash
 docker compose up -d
 ```
 
----
+### Build Container Locally
+To build the multi-stage, production-ready container yourself:
 
-## Configuration
-
-RustDrop can be configured via environment variables. The most common settings:
-
-| Variable | Description | Default |
-| --- | --- | --- |
-| `PORT` | Port the web server listens on | `3000` |
-| `BASE_URL` | Application base URL (must end with `/`) | `http://localhost:PORT/` |
-| `RUSTDROP_PIN` | Optional 4-10 digit authentication PIN | None |
-| `SHOW_FILE_LIST` | Enable file explorer listing/deletion | `false` |
-| `AUTO_UPLOAD` | Start uploading immediately upon selection | `false` |
-| `MAX_FILE_SIZE` | Maximum file size limit in MB | `1024` (1GB) |
-| `ALLOWED_EXTENSIONS` | Comma-separated list of allowed extensions (e.g. `.png,.txt`) | All extensions |
-| `TRUST_PROXY` | Set to `true` if behind Nginx, Cloudflare, etc. | `false` |
-| `TRUSTED_PROXY_IPS` | Comma-separated trusted proxy IPs to prevent IP spoofing | None |
-| `APPRISE_URL` | Apprise notification webhook URL | None |
-
-> [!NOTE]
-> For a full list of settings and advanced proxy configurations, see the [.env.example](file:///.env.example) template.
-
----
-
-## Development
-
-To build from source or run locally:
-
-1. Check the [Local Development Guide](file:///LOCAL_DEVELOPMENT.md).
-2. Configure settings using a `.env` file.
+```bash
+docker build -t rustdrop:local .
+```
 
 ---
 
 ## Technical Details
 
-- **Backend**: Rust (Axum + Tokio)
-- **Frontend**: Rust (Yew + WebAssembly via Trunk)
-- **Styling**: Vanilla CSS variables
-- **Container**: Multi-stage lightweight Docker image
+RustDrop separates concerns into two distinct workspace packages:
+
+```
+                  ┌──────────────────────┐
+                  │ Yew WASM Frontend    │
+                  │ (Compiles to WASM)   │
+                  └──────────┬───────────┘
+                             │
+                  HTTP POST  │ (Multipart API calls)
+                             ▼
+                  ┌──────────────────────┐
+                  │ Axum / Tokio Backend │
+                  │ (File upload / Auth) │
+                  └──────────┬───────────┘
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │ Local Filesystem     │
+                  │ (/app/uploads)       │
+                  └──────────────────────┘
+```
+
+*   **Backend Architecture (Axum + Tokio)**:
+    *   **HTTP Routing**: Handled using `axum::Router`. Routes are nested logically under `/api/auth`, `/api/upload`, and `/api/files`.
+    *   **File Streaming**: Multithreaded streams write incoming multipart byte arrays into chunk structures.
+    *   **Security layer**: PIN validations are verified using timing-attack safe comparisons (`constant_time_eq`). Lockout attempt tables are cached in a thread-safe mutex container.
+    *   **Cleanup Service**: Background tokio tasks periodically remove incomplete chunks and handle retention expiration.
+*   **Frontend Architecture (Yew + WebAssembly)**:
+    *   **State Loop**: Written as a pure single-page client app. Messages drive state changes asynchronously.
+    *   **Async Requests**: Interacts with the backend via `gloo-net` request tasks wrapped under `wasm-bindgen-futures`.
+    *   **Tree Resolution**: Directory dragging utilizes JavaScript interop bindings to recursively parse file metadata before triggering uploads.
+    *   **Localization (i18n)**: Features a custom, type-safe localization module supporting English, Chinese (Simplified), Spanish, German, Japanese, French, Portuguese, and Russian.
 
 ---
 
-## Project Structure
+## File Tree
 
-```
+The workspace is organized into separate crates for frontend and backend:
+
+```text
 RustDrop/
-├── Cargo.toml          # Workspace configuration
-├── Dockerfile          # Multi-stage optimized Rust builder
-├── docker-compose.yml  # Docker Compose configuration
-├── LOCAL_DEVELOPMENT.md# Developer setup documentation
-├── local_uploads/      # Local directory for file uploads (Docker volumes mount here)
-├── public/             # Static web assets & styling
-│   ├── styles.css      # Core application stylesheet
-│   ├── service-worker.js# Service Worker for basic PWA caching
-│   └── assets/         # App icons (vector logo & favicon)
-├── backend/            # Axum HTTP backend server
-│   ├── Cargo.toml      # Backend dependency manifest
-│   └── src/            # Backend controller implementation
-│       ├── main.rs     # Application entrypoint & HTTP server bind
-│       ├── config.rs   # Configuration parsing & validation
-│       ├── security.rs # Timing-safe comparison & lockout validation
-│       ├── utils.rs    # Multipart file-saving helper utilities
-│       ├── routes/     # API routes (Auth, Upload, File management)
-│       └── services/   # Notification services (Apprise integration)
-└── frontend/           # Yew WebAssembly frontend
-    ├── Cargo.toml      # Frontend dependency manifest
-    ├── index.html      # Trunk template HTML entrypoint
-    └── src/            # Yew frontend implementation
-        ├── main.rs     # Yew app mount logic
-        ├── api.rs      # Client network service calls (fetch API)
-        ├── js_api.rs   # JavaScript interop (JS file drag-drop extraction)
-        ├── types.rs    # Core shared frontend data structures
-        ├── utils.rs    # Client utility helpers (formatting, etc.)
-        └── app/        # Yew state management, update cycle, & view components
+├── Cargo.lock
+├── Cargo.toml          # Workspace manifest
+├── Dockerfile          # Multi-stage container instructions
+├── docker-compose.yml  # Docker Compose config file
+├── README.md           # Main documentation
+├── LOCAL_DEVELOPMENT.md# Local setup and notification guide
+├── backend/            # Backend Crate (Axum API)
+│   ├── Cargo.toml
+│   └── src/
+│       ├── main.rs     # Server entrypoint and HSTS binding
+│       ├── config.rs   # Configuration parsing and defaults
+│       ├── security.rs # Brute force prevention and safe compares
+│       ├── utils.rs    # File and storage helpers
+│       ├── routes/     # Routing controllers (auth, files, upload)
+│       └── services/   # Notifications apprise wrapper
+└── frontend/           # Frontend Crate (Yew Application)
+    ├── Cargo.toml
+    ├── index.html      # Trunk template HTML index
+    └── src/
+        ├── main.rs     # Application entry mount point
+        ├── api.rs      # HTTP fetch implementation
+        ├── js_api.rs   # JavaScript drag-drop hooks
+        ├── types.rs    # Message and config structures
+        ├── utils.rs    # Formatting utilities
+        ├── i18n.rs     # Localization module
+        └── app/        # Routing, update loop, and view layers
 ```
 
 ---
 
-## Contributing & License
+## Testing & Linting
 
-1. Fork the repo and create your feature branch.
-2. Commit changes using Conventional Commits.
-3. Open a Pull Request.
+Enforce quality and reproducibility before committing codebase updates:
+
+```bash
+# Check code formatting matches standard rules
+cargo fmt --all -- --check
+
+# Format files in-place
+cargo fmt
+
+# Run Clippy static analysis with warnings denied
+cargo clippy --workspace --all-targets -- -D warnings
+
+# Execute workspace unit and integration tests
+cargo test --workspace
+```
+
+---
+
+## Contributing
+
+1.  Fork the repository and create your feature branch: `git checkout -b feature/your-feature-name`.
+2.  Follow coding standards. Ensure `cargo fmt` and `cargo clippy` pass successfully without warnings.
+3.  Commit your updates using the Conventional Commits style.
+4.  Push changes to your fork and submit a Pull Request.
+
+---
+
+## License
 
 Distributed under the **GPL-3.0 License**. See [LICENSE](file:///LICENSE) for more information.

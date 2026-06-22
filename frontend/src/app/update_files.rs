@@ -1,8 +1,8 @@
 use yew::prelude::*;
 
+use crate::api::{delete_file_api, fetch_files, rename_file_api};
 use crate::app::App;
 use crate::types::{Msg, RenameData};
-use crate::api::{fetch_files, delete_file_api, rename_file_api};
 
 impl App {
     pub fn update_files(&mut self, ctx: &Context<Self>, msg: Msg) -> bool {
@@ -13,17 +13,22 @@ impl App {
                         self.uploaded_files = Some(data);
                     }
                     Err(e) => {
-                        self.show_toast(ctx, &format!("Failed to load files: {}", e), "error");
+                        let translations = crate::i18n::get_translations(self.language);
+                        self.show_toast(
+                            ctx,
+                            &format!("{}{}", translations.failed_load_files_prefix, e),
+                            "error",
+                        );
                     }
                 }
                 true
             }
-            
+
             Msg::RefreshFiles => {
                 if !self.is_authenticated {
                     return false;
                 }
-                
+
                 let link = ctx.link().clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     match fetch_files().await {
@@ -33,12 +38,16 @@ impl App {
                 });
                 false
             }
-            
+
             Msg::DeleteFile(path) => {
-                let name = path.split('/').last().unwrap_or(&path).to_string();
+                let name = path.split('/').next_back().unwrap_or(&path).to_string();
                 let window = web_sys::window().unwrap();
-                let confirm_msg = format!("Are you sure you want to delete \"{}\"?", name);
-                
+                let translations = crate::i18n::get_translations(self.language);
+                let confirm_msg = format!(
+                    "{}{}{}",
+                    translations.delete_confirm_prefix, name, translations.delete_confirm_suffix
+                );
+
                 if window.confirm_with_message(&confirm_msg).unwrap_or(false) {
                     let link = ctx.link().clone();
                     let path_c = path.clone();
@@ -51,21 +60,31 @@ impl App {
                 }
                 false
             }
-            
+
             Msg::DeleteResult(res) => {
                 match res {
                     Ok(path) => {
-                        let name = path.split('/').last().unwrap_or(&path).to_string();
-                        self.show_toast(ctx, &format!("Deleted: {}", name), "success");
+                        let name = path.split('/').next_back().unwrap_or(&path).to_string();
+                        let translations = crate::i18n::get_translations(self.language);
+                        self.show_toast(
+                            ctx,
+                            &format!("{}{}", translations.deleted_prefix, name),
+                            "success",
+                        );
                         ctx.link().send_message(Msg::RefreshFiles);
                     }
                     Err(e) => {
-                        self.show_toast(ctx, &format!("Delete failed: {}", e), "error");
+                        let translations = crate::i18n::get_translations(self.language);
+                        self.show_toast(
+                            ctx,
+                            &format!("{}{}", translations.delete_failed_prefix, e),
+                            "error",
+                        );
                     }
                 }
                 true
             }
-            
+
             Msg::StartRename(path, current_name) => {
                 self.rename_target = Some(RenameData {
                     item_path: path,
@@ -74,27 +93,27 @@ impl App {
                 self.rename_input_val = current_name;
                 true
             }
-            
+
             Msg::CancelRename => {
                 self.rename_target = None;
                 self.rename_input_val.clear();
                 true
             }
-            
+
             Msg::RenameInputChanged(val) => {
                 self.rename_input_val = val;
                 true
             }
-            
+
             Msg::ConfirmRename => {
                 if self.rename_input_val.trim().is_empty() {
                     return false;
                 }
-                
+
                 if let Some(target) = self.rename_target.take() {
                     let new_name = self.rename_input_val.trim().to_string();
                     let link = ctx.link().clone();
-                    
+
                     wasm_bindgen_futures::spawn_local(async move {
                         match rename_file_api(&target.item_path, &new_name).await {
                             Ok(_) => link.send_message(Msg::RenameResult(Ok(new_name))),
@@ -104,18 +123,28 @@ impl App {
                 }
                 false
             }
-            
+
             Msg::RenameResult(res) => {
                 self.rename_target = None;
                 self.rename_input_val.clear();
-                
+
                 match res {
                     Ok(new_name) => {
-                        self.show_toast(ctx, &format!("Renamed to: {}", new_name), "success");
+                        let translations = crate::i18n::get_translations(self.language);
+                        self.show_toast(
+                            ctx,
+                            &format!("{}{}", translations.renamed_prefix, new_name),
+                            "success",
+                        );
                         ctx.link().send_message(Msg::RefreshFiles);
                     }
                     Err(e) => {
-                        self.show_toast(ctx, &format!("Rename failed: {}", e), "error");
+                        let translations = crate::i18n::get_translations(self.language);
+                        self.show_toast(
+                            ctx,
+                            &format!("{}{}", translations.rename_failed_prefix, e),
+                            "error",
+                        );
                     }
                 }
                 true

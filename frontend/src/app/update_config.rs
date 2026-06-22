@@ -11,15 +11,18 @@ impl App {
                 match res {
                     Ok(conf) => {
                         self.pin_input = String::new();
-                        
+
                         let site_title = conf.site_title.clone();
                         self.config = Some(conf.clone());
-                        
+
                         // Set document title dynamically
-                        if let Some(doc) = gloo_utils::document().default_view().and_then(|w| w.document()) {
-                            doc.set_title(&format!("{} - Simple File Upload", site_title));
+                        if let Some(doc) = gloo_utils::document()
+                            .default_view()
+                            .and_then(|w| w.document())
+                        {
+                            doc.set_title(&site_title);
                         }
-                        
+
                         if !conf.pin_required {
                             self.is_authenticated = true;
                             ctx.link().send_message(Msg::RefreshFiles);
@@ -29,12 +32,16 @@ impl App {
                         }
                     }
                     Err(e) => {
-                        self.show_toast(ctx, &format!("Failed to load configuration: {}", e), "error");
+                        self.show_toast(
+                            ctx,
+                            &format!("Failed to load configuration: {}", e),
+                            "error",
+                        );
                     }
                 }
                 true
             }
-            
+
             Msg::ToggleTheme => {
                 self.theme = match self.theme.as_str() {
                     "light" => "dark".to_string(),
@@ -45,6 +52,11 @@ impl App {
                 };
                 save_theme(&self.theme);
                 set_theme_attribute(&self.theme);
+                true
+            }
+            Msg::SwitchLanguage(lang) => {
+                self.language = lang;
+                crate::i18n::save_language(lang);
                 true
             }
             _ => false,

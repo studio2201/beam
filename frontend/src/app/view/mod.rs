@@ -1,6 +1,6 @@
+pub mod explorer;
 pub mod pin_entry;
 pub mod uploader;
-pub mod explorer;
 
 use yew::prelude::*;
 
@@ -9,77 +9,56 @@ use crate::types::Msg;
 
 impl App {
     pub fn render_view(&self, ctx: &Context<Self>) -> Html {
-        let site_title = self.config.as_ref().map(|c| c.site_title.as_str()).unwrap_or("RustDrop");
+        let translations = crate::i18n::get_translations(self.language);
+        let site_title = self
+            .config
+            .as_ref()
+            .map(|c| c.site_title.as_str())
+            .unwrap_or("RustDrop");
+        let pin_required = self.config.as_ref().map(|c| c.pin_required).unwrap_or(false);
 
         html! {
-            <div class="container">
-                {if !self.is_authenticated {
-                    self.render_pin_entry(ctx)
-                } else {
-                    html! {
-                        <>
-                            <header>
-                                <div id="header-title">
-                                    <h1>{site_title}</h1>
-                                </div>
-                                <div class="header-right">
-                                    <button id="theme-toggle" class="icon-button" onclick={ctx.link().callback(|_| Msg::ToggleTheme)} aria-label="Toggle theme">
-                                        {match self.theme.as_str() {
-                                            "dark" => html! {
-                                                <svg id="moon-icon" class="moon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg>
-                                            },
-                                            "nord" => html! {
-                                                <svg id="droplet-icon" class="droplet" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z"/></svg>
-                                            },
-                                            "dracula" => html! {
-                                                <svg id="sparkles-icon" class="sparkles" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
-                                            },
-                                            "sepia" => html! {
-                                                <svg id="coffee-icon" class="coffee" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
-                                            },
-                                            _ => html! {
-                                                <svg id="sun-icon" class="sun" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="M4.93 4.93l1.41 1.41" /><path d="M17.66 17.66l1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="M6.34 17.66l-1.41 1.41" /><path d="M19.07 4.93l-1.41 1.41" /></svg>
-                                            },
-                                        }}
-                                    </button>
-                                    {if self.config.as_ref().map(|c| c.pin_required).unwrap_or(false) {
-                                        html! {
-                                            <button id="logout-button" class="icon-button" onclick={ctx.link().callback(|_| Msg::Logout)} data-tooltip="Log Out">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                                    <polyline points="16 17 21 12 16 7" />
-                                                    <line x1="21" y1="12" x2="9" y2="12" />
-                                                </svg>
-                                            </button>
-                                        }
-                                    } else {
-                                        html! {}
-                                    }}
-                                </div>
-                            </header>
-                            <main>
-                                {self.render_uploader(ctx)}
-                                
-                                <div style="margin-top: 1.5rem; padding: 0; overflow-y: auto;">
-                                    {self.render_explorer(ctx)}
-                                </div>
-                            </main>
-                            {if let Some(ref data) = self.uploaded_files {
-                                html! {
-                                    <footer style="margin-top: 2rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-color-secondary); opacity: 0.6; text-align: center;">
-                                        {format!("{} file{} • {}", 
-                                            data.total_files,
-                                            if data.total_files != 1 { "s" } else { "" },
-                                            data.formatted_total_size
-                                        )}
-                                    </footer>
-                                }
-                            } else {
-                                html! {}
-                            }}
-                        </>
-                    }
-                }}
+            <>
+                <crate::header::Header
+                    site_title={site_title.to_string()}
+                    theme={self.theme.clone()}
+                    is_authenticated={self.is_authenticated}
+                    pin_required={pin_required}
+                    language={self.language}
+                    toggle_theme={ctx.link().callback(|_| Msg::ToggleTheme)}
+                    on_logout={ctx.link().callback(|_| Msg::Logout)}
+                    on_language_change={ctx.link().callback(Msg::SwitchLanguage)}
+                    logout_tooltip={translations.log_out.to_string()}
+                />
+                <div class="container">
+                    {if !self.is_authenticated {
+                        self.render_pin_entry(ctx)
+                    } else {
+                        html! {
+                            <>
+                                <main>
+                                    {self.render_uploader(ctx)}
+
+                                    <div style="margin-top: 1.5rem; padding: 0; overflow-y: auto;">
+                                        {self.render_explorer(ctx)}
+                                    </div>
+                                </main>
+                                {if let Some(ref data) = self.uploaded_files {
+                                    html! {
+                                        <div class="file-summary" style="margin-top: 2rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-color-secondary); opacity: 0.6; text-align: center;">
+                                            {format!("{} {} • {}",
+                                                data.total_files,
+                                                if data.total_files == 1 { &translations.file_singular } else { &translations.file_plural },
+                                                data.formatted_total_size
+                                            )}
+                                        </div>
+                                    }
+                                } else {
+                                    html! {}
+                                }}
+                            </>
+                        }
+                    }}
 
                 // Rename Modal Dialog
                 {if self.rename_target.is_some() {
@@ -93,12 +72,12 @@ impl App {
                             }
                         })}>
                             <div class="rename-modal-content">
-                                <h3>{"Rename Item"}</h3>
-                                <input 
-                                    type="text" 
-                                    id="renameInput" 
-                                    class="rename-input" 
-                                    value={self.rename_input_val.clone()} 
+                                <h3>{translations.rename_item}</h3>
+                                <input
+                                    type="text"
+                                    id="renameInput"
+                                    class="rename-input"
+                                    value={self.rename_input_val.clone()}
                                     oninput={ctx.link().callback(|e: InputEvent| {
                                         let input: web_sys::HtmlInputElement = e.target_unchecked_into();
                                         Msg::RenameInputChanged(input.value())
@@ -115,10 +94,10 @@ impl App {
                                 />
                                 <div class="rename-actions">
                                     <button class="modal-btn modal-btn-cancel" onclick={ctx.link().callback(|_| Msg::CancelRename)}>
-                                        {"Cancel"}
+                                        {&translations.cancel}
                                     </button>
                                     <button class="modal-btn modal-btn-confirm" onclick={ctx.link().callback(|_| Msg::ConfirmRename)}>
-                                        {"Rename"}
+                                        {&translations.rename}
                                     </button>
                                 </div>
                             </div>
@@ -128,17 +107,17 @@ impl App {
                     html! {}
                 }}
 
-                // Toast Notification Overlay
-                <div class="toast-container">
-                    {for self.toasts.iter().map(|toast| {
-                        html! {
-                            <div key={toast.id} class={classes!("toast", format!("toast-{}", toast.toast_type))}>
-                                {&toast.message}
-                            </div>
-                        }
-                    })}
-                </div>
             </div>
+            <footer class="layout-footer">
+                {
+                    if let Some((msg, cls)) = &self.active_notification {
+                        html! { <div class={format!("footer-status-text {}", cls)}>{ msg }</div> }
+                    } else {
+                        html! {}
+                    }
+                }
+            </footer>
+            </>
         }
     }
 }

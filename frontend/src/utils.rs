@@ -1,24 +1,12 @@
 use wasm_bindgen::JsValue;
+use crate::storage::StorageService;
 
 pub fn get_saved_theme() -> String {
-    let window = web_sys::window().unwrap();
-    let local_storage = window.local_storage().unwrap().unwrap();
-    if let Ok(Some(theme)) = local_storage.get_item("theme") {
-        theme
-    } else {
-        let media_query = window.match_media("(prefers-color-scheme: dark)").unwrap().unwrap();
-        if media_query.matches() {
-            "dark".to_string()
-        } else {
-            "light".to_string()
-        }
-    }
+    StorageService::get_item("theme", "dark")
 }
 
 pub fn save_theme(theme: &str) {
-    let window = web_sys::window().unwrap();
-    let local_storage = window.local_storage().unwrap().unwrap();
-    let _ = local_storage.set_item("theme", theme);
+    StorageService::set_item("theme", theme);
 }
 
 pub fn set_theme_attribute(theme: &str) {
@@ -36,15 +24,6 @@ pub fn format_file_size(bytes: u64) -> String {
     let i = (bytes as f64).log(k).floor() as usize;
     let val = bytes as f64 / k.powi(i as i32);
     format!("{:.2} {}", val, sizes[i])
-}
-
-#[allow(dead_code)]
-pub fn format_date(date_str: &str) -> String {
-    if date_str.len() >= 10 {
-        date_str[0..10].to_string()
-    } else {
-        date_str.to_string()
-    }
 }
 
 pub fn generate_batch_id() -> String {
@@ -71,9 +50,5 @@ pub fn get_file_path(file: &web_sys::File) -> String {
         .ok()
         .and_then(|v| v.as_string())
         .unwrap_or_default();
-    if path.is_empty() {
-        file.name()
-    } else {
-        path
-    }
+    if path.is_empty() { file.name() } else { path }
 }

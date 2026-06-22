@@ -85,7 +85,9 @@ export async function getFilesFromDataTransfer(dataTransfer) {
 "#)]
 extern "C" {
     #[wasm_bindgen(js_name = getFilesFromDataTransfer, catch)]
-    pub async fn get_files_from_data_transfer(data_transfer: &web_sys::DataTransfer) -> Result<js_sys::Array, JsValue>;
+    pub async fn get_files_from_data_transfer(
+        data_transfer: &web_sys::DataTransfer,
+    ) -> Result<js_sys::Array, JsValue>;
 }
 
 #[wasm_bindgen(inline_js = r#"

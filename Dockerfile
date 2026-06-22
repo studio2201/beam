@@ -1,5 +1,5 @@
 # Stage 1: Build the Frontend (Yew WebAssembly)
-FROM rust:1.80-slim as frontend-builder
+FROM rust:1.85-slim as frontend-builder
 WORKDIR /usr/src/app
 
 # Install compilation dependencies and Trunk binary
@@ -12,12 +12,11 @@ RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk
 
 COPY Cargo.toml ./
 COPY frontend/ ./frontend/
-COPY public/ ./public/
 WORKDIR /usr/src/app/frontend
 RUN trunk build --release
 
 # Stage 2: Build the Backend
-FROM rust:1.80-slim as backend-builder
+FROM rust:1.85-slim as backend-builder
 WORKDIR /usr/src/app
 
 COPY Cargo.toml Cargo.lock ./
@@ -29,22 +28,22 @@ RUN cargo build --release --bin backend
 FROM debian:bookworm-slim
 WORKDIR /usr/src/app
 
-# Install python, virtual environment, and apprise for notification functionality
+# Install runtime dependencies (SSL certificates for HTTPS notification requests)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip python3-venv ca-certificates && \
-    python3 -m venv /opt/venv && \
-    /opt/venv/bin/pip install --no-cache-dir apprise && \
-    apt-get purge -y --auto-remove python3-pip && \
+    ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/opt/venv/bin:$PATH"
-ENV PORT=3000
+ENV PORT=4401
 ENV NODE_ENV=production
 
 COPY --from=backend-builder /usr/src/app/target/release/backend ./rustdrop
 COPY --from=frontend-builder /usr/src/app/frontend/dist ./frontend/dist
 
-RUN mkdir -p uploads
-EXPOSE 3000
+RUN mkdir -p uploads data && chown -R nobody:nogroup /usr/src/app
+
+# Run as nobody
+USER nobody
+
+EXPOSE 4401
 
 CMD ["./rustdrop"]
