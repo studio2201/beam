@@ -46,10 +46,10 @@ ENV NODE_ENV=production
 COPY --from=backend-builder /usr/src/app/target/release/backend ./rustdrop
 COPY --from=frontend-builder /usr/src/app/frontend/dist ./frontend/dist
 
-RUN mkdir -p uploads data && chown -R nobody:nogroup /usr/src/app
+RUN mkdir -p uploads data && chown -R 99:100 /usr/src/app
 
-# Run as nobody
-USER nobody
+# Run as Unraid nobody:users
+USER 99:100
 
 EXPOSE 4401
 
