@@ -46,22 +46,35 @@ fn flatten_files(items: &[FileItem]) -> Vec<FileItem> {
     files
 }
 
+fn get_file_icon(extension: &str) -> &'static str {
+    match extension {
+        ".jpg" | ".jpeg" | ".png" | ".webp" | ".gif" | ".svg" | ".bmp" | ".ico" | ".tiff" => "🖼️ ",
+        ".mp4" | ".mkv" | ".avi" | ".mov" | ".webm" | ".flv" | ".wmv" | ".mpeg" => "🎬 ",
+        ".mp3" | ".wav" | ".ogg" | ".m4a" | ".flac" | ".aac" | ".wma" => "🎵 ",
+        ".pdf" => "📖 ",
+        ".zip" | ".rar" | ".7z" | ".tar" | ".gz" | ".bz2" | ".xz" | ".tgz" => "📦 ",
+        ".txt" | ".md" | ".log" | ".json" | ".xml" | ".yml" | ".yaml" | ".toml" | ".ini" | ".conf" | ".sh" | ".bat" | ".rs" | ".js" | ".ts" | ".py" | ".c" | ".cpp" | ".h" | ".html" | ".css" => "📝 ",
+        _ => "📄 ",
+    }
+}
+
 // Render helper for flat file list
 fn render_file_items(items: &[FileItem], _level: usize, link: Scope<App>) -> Html {
     html! {
         <>
             {for items.iter().map(|item| {
                 match item {
-                    FileItem::File { name, path, size: _, formatted_size, upload_date: _, extension: _ } => {
+                    FileItem::File { name, path, size: _, formatted_size, upload_date: _, extension } => {
                         let path_c = path.clone();
                         let path_s = path.clone();
                         let link_d = link.clone();
                         let link_s = link.clone();
+                        let icon = get_file_icon(extension);
                         
                         html! {
                             <div class="uploaded-file-item">
                                 <div class="uploaded-file-name" style="word-break: break-all;">
-                                    {"📄 "}{name}
+                                    {icon}{name}
                                 </div>
                                 <div class="uploaded-file-size">{formatted_size}</div>
                                 <div class="uploaded-file-actions">

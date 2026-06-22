@@ -52,6 +52,19 @@ impl App {
                                     {self.render_explorer(ctx)}
                                 </div>
                             </main>
+                            {if let Some(ref data) = self.uploaded_files {
+                                html! {
+                                    <footer style="margin-top: 2rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-color-secondary); opacity: 0.6; text-align: center;">
+                                        {format!("{} file{} • {}", 
+                                            data.total_files,
+                                            if data.total_files != 1 { "s" } else { "" },
+                                            data.formatted_total_size
+                                        )}
+                                    </footer>
+                                }
+                            } else {
+                                html! {}
+                            }}
                         </>
                     }
                 }}

@@ -12,6 +12,7 @@
   --header-bg: #f8fafc;
   --textarea-bg: white;
   --button-hover: #e5e7eb;
+  --text-color-secondary: #666666;
 }
 
 [data-theme='dark'] {
@@ -28,6 +29,7 @@
   --header-bg: #111111;
   --textarea-bg: #2d2d2d;
   --button-hover: #404040;
+  --text-color-secondary: #aaaaaa;
 }
 
 * {
