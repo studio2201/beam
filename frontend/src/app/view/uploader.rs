@@ -130,15 +130,6 @@ impl App {
                                 }
                             })
                         }>{"Browse Files"}</button>
-                        
-                        <button onclick={
-                            let r = self.folder_input_ref.clone();
-                            Callback::from(move |_| {
-                                if let Some(input) = r.cast::<web_sys::HtmlInputElement>() {
-                                    input.click();
-                                }
-                            })
-                        }>{"Browse Folders"}</button>
                       </div>
                     </div>
                 </div>
