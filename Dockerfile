@@ -19,6 +19,11 @@ RUN trunk build --release
 FROM rust:1.85-slim as backend-builder
 WORKDIR /usr/src/app
 
+# Install dependencies required to build native packages like openssl-sys
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev gcc g++ make && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY Cargo.toml Cargo.lock ./
 COPY backend/ ./backend/
 # We only compile the backend binary here
