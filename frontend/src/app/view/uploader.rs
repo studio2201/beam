@@ -144,67 +144,71 @@ impl App {
                 </div>
                 
                 // Selected Files Queued
-                <div id="fileList" class="file-list">
-                    {if !self.is_uploading && !self.upload_queue.is_empty() {
-                        html! {
-                            <>
-                                {for self.upload_queue.iter().map(|file| {
-                                    let path = get_file_path(file);
-                                    html! {
-                                        <div class="file-item">
-                                            {format!("📄 {} ({})", path, format_file_size(file.size() as u64))}
-                                        </div>
-                                    }
-                                })}
-                            </>
-                        }
-                    } else {
-                        html! {}
-                    }}
-                </div>
+                {if !self.is_uploading && !self.upload_queue.is_empty() {
+                    html! {
+                        <div id="fileList" class="file-list">
+                            {for self.upload_queue.iter().map(|file| {
+                                let path = get_file_path(file);
+                                html! {
+                                    <div class="file-item">
+                                        {format!("📄 {} ({})", path, format_file_size(file.size() as u64))}
+                                    </div>
+                                }
+                            })}
+                        </div>
+                    }
+                } else {
+                    html! {}
+                }}
                 
                 // Upload progress bars
-                <div id="uploadProgress">
-                    {for self.active_uploads.values().map(|upload| {
-                        let percent = if upload.size > 0 {
-                            (upload.uploaded as f64 / upload.size as f64) * 100.0
-                        } else {
-                            100.0
-                        };
-                        
-                        // Speed text
-                        let rate_text = if upload.rate > 0.0 {
-                            let units = ["B/s", "KB/s", "MB/s", "GB/s"];
-                            let mut i = 0;
-                            let mut r = upload.rate;
-                            while r >= 1024.0 && i < units.len() - 1 {
-                                r /= 1024.0;
-                                i += 1;
-                            }
-                            format!("{:.1} {}", r, units[i])
-                        } else {
-                            "0.0 B/s".to_string()
-                        };
-                        
-                        let details_text = format!("{} of {} ({:.1}%)", format_file_size(upload.uploaded), format_file_size(upload.size), percent);
-                        let is_complete = upload.status == "complete";
-                        
-                        html! {
-                            <div class="progress-container" style={if is_complete { "display: none;" } else { "" }}>
-                                <div class="progress-label">{&upload.path}</div>
-                                <div class="progress">
-                                    <div class="progress-bar" style={format!("width: {:.1}%", percent)}></div>
-                                </div>
-                                <div class="progress-status">
-                                    <div class="progress-info" style={upload.error_color.as_ref().map(|c| format!("color: {}", c)).unwrap_or_default()}>
-                                        {if is_complete { "complete".to_string() } else { format!("{} · {}", rate_text, upload.status) }}
+                {if !self.active_uploads.is_empty() {
+                    html! {
+                        <div id="uploadProgress">
+                            {for self.active_uploads.values().map(|upload| {
+                                let percent = if upload.size > 0 {
+                                    (upload.uploaded as f64 / upload.size as f64) * 100.0
+                                } else {
+                                    100.0
+                                };
+                                
+                                // Speed text
+                                let rate_text = if upload.rate > 0.0 {
+                                    let units = ["B/s", "KB/s", "MB/s", "GB/s"];
+                                    let mut i = 0;
+                                    let mut r = upload.rate;
+                                    while r >= 1024.0 && i < units.len() - 1 {
+                                        r /= 1024.0;
+                                        i += 1;
+                                    }
+                                    format!("{:.1} {}", r, units[i])
+                                } else {
+                                    "0.0 B/s".to_string()
+                                };
+                                
+                                let details_text = format!("{} of {} ({:.1}%)", format_file_size(upload.uploaded), format_file_size(upload.size), percent);
+                                let is_complete = upload.status == "complete";
+                                
+                                html! {
+                                    <div class="progress-container" style={if is_complete { "display: none;" } else { "" }}>
+                                        <div class="progress-label">{&upload.path}</div>
+                                        <div class="progress">
+                                            <div class="progress-bar" style={format!("width: {:.1}%", percent)}></div>
+                                        </div>
+                                        <div class="progress-status">
+                                            <div class="progress-info" style={upload.error_color.as_ref().map(|c| format!("color: {}", c)).unwrap_or_default()}>
+                                                {if is_complete { "complete".to_string() } else { format!("{} · {}", rate_text, upload.status) }}
+                                            </div>
+                                            <div class="progress-details">{details_text}</div>
+                                        </div>
                                     </div>
-                                    <div class="progress-details">{details_text}</div>
-                                </div>
-                            </div>
-                        }
-                    })}
-                </div>
+                                }
+                            })}
+                        </div>
+                    }
+                } else {
+                    html! {}
+                }}
                 
                 // Manual Upload Button (if auto_upload is disabled)
                 {if !self.is_uploading && !self.upload_queue.is_empty() && self.config.as_ref().map(|c| !c.auto_upload).unwrap_or(true) {
