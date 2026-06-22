@@ -16,7 +16,8 @@ RUN case "$(uname -m)" in \
     esac && \
     wget -qO- "https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-${ARCH}-unknown-linux-gnu.tar.gz" | tar -xzf- -C /usr/local/bin
 
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
+COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 WORKDIR /usr/src/app/frontend
 RUN trunk build --release
