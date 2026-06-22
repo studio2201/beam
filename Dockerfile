@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY Cargo.toml Cargo.lock ./
 COPY backend/ ./backend/
+COPY frontend/ ./frontend/
 # We only compile the backend binary here
 RUN cargo build --release --bin backend
 
