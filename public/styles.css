@@ -466,20 +466,21 @@ button:disabled {
     grid-template-columns: 1fr 100px 240px;
     align-items: center;
     gap: 15px;
-    padding: 10px;
-    margin: 5px 0;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    transition: background 0.3s;
+    padding: 12px 10px;
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
     text-align: left;
     min-width: 650px;
 }
-.uploaded-file-item:hover {
-    background: var(--hover-bg, rgba(0, 0, 0, 0.05));
+.uploaded-file-item:last-child {
+    border-bottom: none;
 }
-[data-theme="dark"] .uploaded-file-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+.uploaded-file-item:hover {
+    background: rgba(128, 128, 128, 0.08);
+    border-radius: 6px;
 }
 .uploaded-file-name {
     font-weight: 500;
