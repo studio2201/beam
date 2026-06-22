@@ -101,6 +101,14 @@ impl Component for App {
     fn view(&self, ctx: &Context<Self>) -> Html {
         self.render_view(ctx)
     }
+
+    fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
+        if !self.is_authenticated && !self.is_lockout {
+            if let Some(input) = self.pin_ref.cast::<web_sys::HtmlInputElement>() {
+                let _ = input.focus();
+            }
+        }
+    }
 }
 
 impl App {
