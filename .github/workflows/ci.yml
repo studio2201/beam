@@ -69,5 +69,8 @@ jobs:
           cd frontend
           trunk build --release
 
+      - name: Run Tests
+        run: cargo test --workspace --exclude frontend
+
       - name: Build Backend
         run: cargo build --release --bin backend
