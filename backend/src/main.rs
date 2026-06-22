@@ -10,7 +10,6 @@ use axum::{
     response::{IntoResponse, Response, Redirect},
     Extension, Router,
 };
-use axum_extra::extract::cookie::CookieJar;
 use axum::http::StatusCode;
 use std::fs;
 use std::path::Path;
@@ -87,28 +86,12 @@ async fn main() {
 
 async fn serve_index(
     State(config): State<Arc<AppConfig>>,
-    jar: CookieJar,
 ) -> impl IntoResponse {
-    if let Some(ref pin) = config.pin {
-        let cookie_pin = jar.get("RUSTDROP_PIN").map(|c| c.value());
-        let mut authenticated = false;
-        if let Some(provided) = cookie_pin {
-            if crate::security::safe_compare(provided, pin) {
-                authenticated = true;
-            }
-        }
-        if !authenticated {
-            return Redirect::temporary("/login.html").into_response();
-        }
-    }
-    
     serve_html(config, "index.html").await.into_response()
 }
 
-async fn serve_login(
-    State(config): State<Arc<AppConfig>>,
-) -> impl IntoResponse {
-    serve_html(config, "login.html").await
+async fn serve_login() -> impl IntoResponse {
+    Redirect::temporary("/")
 }
 
 async fn serve_html(
