@@ -1,64 +1,50 @@
-# Base stage for shared configurations
-FROM node:22-alpine as base
-
-# Install python and create virtual environment with minimal dependencies
-RUN apk add --no-cache python3 py3-pip && \
-    python3 -m venv /opt/venv && \
-    rm -rf /var/cache/apk/*
-
-# Activate virtual environment and install apprise
-RUN . /opt/venv/bin/activate && \
-    pip install --no-cache-dir apprise && \
-    find /opt/venv -type d -name "__pycache__" -exec rm -r {} +
-
-# Add virtual environment to PATH
-ENV PATH="/opt/venv/bin:$PATH"
-
+# Stage 1: Build the Frontend (Yew WebAssembly)
+FROM rust:1.80-slim as frontend-builder
 WORKDIR /usr/src/app
 
-# Dependencies stage
-FROM base as deps
+# Install compilation dependencies and Trunk binary
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget pkg-config libssl-dev ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY package*.json ./
-RUN npm ci --only=production && \
-    # Remove npm cache
-    npm cache clean --force
+RUN rustup target add wasm32-unknown-unknown
+RUN wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xzf- -C /usr/local/bin
 
-# Development stage
-FROM deps as development
-ENV NODE_ENV=development
-
-# Install dev dependencies
-RUN npm install && \
-    npm cache clean --force
-
-# Create upload directory
-RUN mkdir -p uploads
-
-# Copy source with specific paths to avoid unnecessary files
-COPY src/ ./src/
+COPY Cargo.toml ./
+COPY frontend/ ./frontend/
 COPY public/ ./public/
-COPY __tests__/ ./__tests__/
-COPY dev/ ./dev/
-COPY .eslintrc.json .eslintignore ./
+WORKDIR /usr/src/app/frontend
+RUN trunk build --release
 
-# Expose port
-EXPOSE 3000
+# Stage 2: Build the Backend
+FROM rust:1.80-slim as backend-builder
+WORKDIR /usr/src/app
 
-CMD ["npm", "run", "dev"]
+COPY Cargo.toml Cargo.lock ./
+COPY backend/ ./backend/
+# We only compile the backend binary here
+RUN cargo build --release --bin backend
 
-# Production stage
-FROM deps as production
+# Stage 3: Final package
+FROM debian:bookworm-slim
+WORKDIR /usr/src/app
+
+# Install python, virtual environment, and apprise for notification functionality
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-venv ca-certificates && \
+    python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir apprise && \
+    apt-get purge -y --auto-remove python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PORT=3000
 ENV NODE_ENV=production
 
-# Create upload directory
+COPY --from=backend-builder /usr/src/app/target/release/backend ./rustdrop
+COPY --from=frontend-builder /usr/src/app/frontend/dist ./frontend/dist
+
 RUN mkdir -p uploads
-
-# Copy only necessary source files
-COPY src/ ./src/
-COPY public/ ./public/
-
-# Expose port
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["./rustdrop"]

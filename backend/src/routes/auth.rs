@@ -146,19 +146,8 @@ async fn verify_pin(
     };
 
     // 2. Validate empty/missing PIN (returns 400)
-    let Some(ref pin_str) = payload.pin else {
-        let res = (
-            StatusCode::BAD_REQUEST,
-            Json(VerifyPinResponse {
-                success: false,
-                error: Some("PIN is required.".to_string()),
-                path: None,
-            }),
-        ).into_response();
-        return (jar, res).into_response();
-    };
-
-    if pin_str.trim().is_empty() {
+    let pin_str = payload.pin.as_deref().unwrap_or("").trim();
+    if pin_str.is_empty() {
         let res = (
             StatusCode::BAD_REQUEST,
             Json(VerifyPinResponse {
@@ -196,7 +185,7 @@ async fn verify_pin(
         reset_attempts(&ip);
         
         // Build secure cookie
-        let secure_cookie = Cookie::build(("RUSTDROP_PIN", pin_str.clone()))
+        let secure_cookie = Cookie::build(("RUSTDROP_PIN", pin_str.to_string()))
             .http_only(true)
             .secure(config.base_url.starts_with("https"))
             .same_site(cookie::SameSite::Strict)

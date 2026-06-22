@@ -1,0 +1,57 @@
+use yew::prelude::{Context, NodeRef};
+
+use crate::app::App;
+use crate::types::Msg;
+use crate::utils::{save_theme, set_theme_attribute};
+use crate::api::check_already_authenticated;
+
+impl App {
+    pub fn update_config(&mut self, ctx: &Context<Self>, msg: Msg) -> bool {
+        match msg {
+            Msg::LoadConfig(res) => {
+                match res {
+                    Ok(conf) => {
+                        let pin_len = conf.pin_length;
+                        self.pin_digits = vec!["".to_string(); pin_len];
+                        self.pin_refs = (0..pin_len).map(|_| NodeRef::default()).collect();
+                        
+                        let site_title = conf.site_title.clone();
+                        self.config = Some(conf.clone());
+                        
+                        // Set document title dynamically
+                        if let Some(doc) = gloo_utils::document().default_view().and_then(|w| w.document()) {
+                            doc.set_title(&format!("{} - Simple File Upload", site_title));
+                        }
+                        
+                        if !conf.pin_required {
+                            self.is_authenticated = true;
+                            ctx.link().send_message(Msg::RefreshFiles);
+                        } else {
+                            // Verify if already authenticated via session/cookie
+                            let link = ctx.link().clone();
+                            wasm_bindgen_futures::spawn_local(async move {
+                                if check_already_authenticated().await {
+                                    link.send_message(Msg::PinVerificationResult(Ok(true)));
+                                } else {
+                                    link.send_message(Msg::PinVerificationResult(Err("".to_string())));
+                                }
+                            });
+                        }
+                    }
+                    Err(e) => {
+                        self.show_toast(ctx, &format!("Failed to load configuration: {}", e), "error");
+                    }
+                }
+                true
+            }
+            
+            Msg::ToggleTheme => {
+                self.theme = if self.theme == "light" { "dark".to_string() } else { "light".to_string() };
+                save_theme(&self.theme);
+                set_theme_attribute(&self.theme);
+                true
+            }
+            _ => false,
+        }
+    }
+}
