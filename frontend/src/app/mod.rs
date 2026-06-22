@@ -106,6 +106,10 @@ impl Component for App {
         if !self.is_authenticated && !self.is_lockout {
             if let Some(input) = self.pin_ref.cast::<web_sys::HtmlInputElement>() {
                 let _ = input.focus();
+                let input_clone = input.clone();
+                gloo_timers::callback::Timeout::new(50, move || {
+                    let _ = input_clone.focus();
+                }).forget();
             }
         }
     }
@@ -121,6 +125,10 @@ impl App {
         if let Some(input) = self.pin_ref.cast::<web_sys::HtmlInputElement>() {
             input.set_value("");
             let _ = input.focus();
+            let input_clone = input.clone();
+            gloo_timers::callback::Timeout::new(50, move || {
+                let _ = input_clone.focus();
+            }).forget();
         }
     }
 }

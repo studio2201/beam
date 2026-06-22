@@ -77,29 +77,52 @@ pub fn get_max_attempts() -> u32 {
     MAX_ATTEMPTS
 }
 
+fn normalize_ip(ip: IpAddr) -> IpAddr {
+    match ip {
+        IpAddr::V6(ipv6) => {
+            if let Some(ipv4) = ipv6.to_ipv4_mapped() {
+                IpAddr::V4(ipv4)
+            } else {
+                IpAddr::V6(ipv6)
+            }
+        }
+        IpAddr::V4(ipv4) => IpAddr::V4(ipv4),
+    }
+}
+
 pub fn get_client_ip(
     headers: &HeaderMap,
     addr: SocketAddr,
     trust_proxy: bool,
     trusted_proxy_ips: Option<&[String]>,
 ) -> String {
+    let socket_ip = normalize_ip(addr.ip());
+
     if trust_proxy {
         if let Some(forwarded_for) = headers.get("x-forwarded-for").and_then(|h| h.to_str().ok()) {
             if let Some(first_ip_str) = forwarded_for.split(',').next() {
                 let trimmed = first_ip_str.trim();
-                if let Some(_trusted) = trusted_proxy_ips {
-                    // For security, if trusted proxy IPs are configured, verify. 
-                    // To keep it simple, if it's a valid IP, we trust it, matching the Express middleware's general behavior
-                    if let Ok(ip) = trimmed.parse::<IpAddr>() {
-                        return ip.to_string();
+                if let Some(trusted) = trusted_proxy_ips {
+                    // For security, if trusted proxy IPs are configured, verify the connecting socket IP is in that list.
+                    let is_trusted = trusted.iter().any(|t_str| {
+                        if let Ok(t_ip) = t_str.parse::<IpAddr>() {
+                            normalize_ip(t_ip) == socket_ip
+                        } else {
+                            false
+                        }
+                    });
+                    if is_trusted {
+                        if let Ok(ip) = trimmed.parse::<IpAddr>() {
+                            return normalize_ip(ip).to_string();
+                        }
                     }
                 } else {
                     if let Ok(ip) = trimmed.parse::<IpAddr>() {
-                        return ip.to_string();
+                        return normalize_ip(ip).to_string();
                     }
                 }
             }
         }
     }
-    addr.ip().to_string()
+    socket_ip.to_string()
 }
