@@ -1,7 +1,7 @@
 # RustDrop
 
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/UberMetroid/RustDrop?label=version" alt="GitHub release" />
+  <img src="https://img.shields.io/github/v/tag/UberMetroid/RustDrop?label=version" alt="GitHub tag" />
   <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License" />
   <img src="https://img.shields.io/github/actions/workflow/status/UberMetroid/RustDrop/docker-publish.yml" alt="GitHub Actions Workflow Status" />
 </p>
