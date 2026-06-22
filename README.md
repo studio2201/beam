@@ -199,18 +199,28 @@ RustDrop/
 │       ├── config.rs   # Configuration parsing and defaults
 │       ├── security.rs # Brute force prevention and safe compares
 │       ├── utils.rs    # File and storage helpers
+│       ├── services.rs # Native Apprise alert notifications
 │       ├── routes/     # Routing controllers (auth, files, upload)
-│       └── services/   # Notifications apprise wrapper
+│       └── tests.rs    # Backend unit test suite
 └── frontend/           # Frontend Crate (Yew Application)
     ├── Cargo.toml
     ├── index.html      # Trunk template HTML index
+    ├── Assets/         # Static assets and stylesheets
+    │   ├── app.css     # Drag zone and upload queue transitions
+    │   ├── base.css    # Styling variables and base layout resets
+    │   ├── header.css  # Navigation header layout styling
+    │   ├── login.css   # Card wrapper layout styling
+    │   ├── assets/     # SVG and PNG icons
+    │   └── service-worker.js # PWA offline service worker
     └── src/
         ├── main.rs     # Application entry mount point
         ├── api.rs      # HTTP fetch implementation
+        ├── header.rs   # Shared navigation header component
+        ├── i18n.rs     # Localization module and translation dictionaries
         ├── js_api.rs   # JavaScript drag-drop hooks
+        ├── storage.rs  # LocalStorage abstractions
         ├── types.rs    # Message and config structures
         ├── utils.rs    # Formatting utilities
-        ├── i18n.rs     # Localization module
         └── app/        # Routing, update loop, and view layers
 ```
 
