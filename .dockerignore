@@ -1,58 +1,34 @@
 # Version control
 .git
 .gitignore
+.gitattributes
 
-# Dependencies
-node_modules
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# Environment variables
+# Environment files
 .env
 .env.*
 !.env.example
 
-# Development
-.vscode
-.idea
+# Rust build outputs
+target/
+**/target/
+frontend/dist/
+frontend/target/
+
+# Local data & uploads
+local_uploads/
+uploads/
+
+# Development configurations
+.vscode/
+.idea/
 *.swp
 *.swo
-
-# Build outputs
-dist
-build
-coverage
-
-# Local uploads (development only)
-local_uploads
-
-# Logs
-logs
-*.log
+.cursorrules
 
 # System files
 .DS_Store
 Thumbs.db
 
-# Docker
-.docker
+# Docker files
 docker-compose*.yml
 Dockerfile*
-
-# Documentation
-README.md
-CHANGELOG.md
-docs
-
-# Testing
-test/
-*.test.js
-*.spec.js
-coverage/
-
-# Development configs
-.editorconfig
-nodemon.json
-eslint.config.js
-.prettierrc
