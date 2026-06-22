@@ -19,7 +19,7 @@ use tokio_util::io::ReaderStream;
 use crate::config::AppConfig;
 use crate::routes::auth::RequirePin;
 use self::helpers::{
-    get_directory_contents, calculate_total_size, count_files, create_safe_content_disposition
+    get_directory_contents, calculate_total_size, count_files, create_safe_content_disposition, get_content_type
 };
 
 pub fn router() -> Router<crate::AppState> {
@@ -103,10 +103,11 @@ async fn download_file(
     let body = Body::from_stream(stream);
 
     let content_disposition = create_safe_content_disposition(&decoded_path);
+    let content_type = get_content_type(&decoded_path);
 
     Response::builder()
         .header(axum::http::header::CONTENT_DISPOSITION, content_disposition)
-        .header(axum::http::header::CONTENT_TYPE, "application/octet-stream")
+        .header(axum::http::header::CONTENT_TYPE, content_type)
         .body(body)
         .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
 }

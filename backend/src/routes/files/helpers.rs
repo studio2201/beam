@@ -137,12 +137,40 @@ pub fn create_safe_content_disposition(filename: &str) -> String {
 
     if is_ascii_printable {
         let escaped = sanitized.replace('\\', "\\\\").replace('"', "\\\"");
-        format!("attachment; filename=\"{}\"", escaped)
+        format!("inline; filename=\"{}\"", escaped)
     } else {
         let encoded = percent_encoding::utf8_percent_encode(&sanitized, percent_encoding::NON_ALPHANUMERIC).to_string();
         let ascii_safe: String = sanitized.chars()
             .map(|c| if c >= ' ' && c <= '~' { c } else { '_' })
             .collect();
-        format!("attachment; filename=\"{}\"; filename*=UTF-8''{}", ascii_safe, encoded)
+        format!("inline; filename=\"{}\"; filename*=UTF-8''{}", ascii_safe, encoded)
+    }
+}
+
+pub fn get_content_type(filename: &str) -> &'static str {
+    let ext = StdPath::new(filename)
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_lowercase())
+        .unwrap_or_default();
+
+    match ext.as_str() {
+        "jpg" | "jpeg" => "image/jpeg",
+        "png" => "image/png",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "svg" => "image/svg+xml",
+        "pdf" => "application/pdf",
+        "txt" => "text/plain; charset=utf-8",
+        "mp3" => "audio/mpeg",
+        "mp4" => "video/mp4",
+        "webm" => "video/webm",
+        "ogg" => "audio/ogg",
+        "wav" => "audio/wav",
+        "html" | "htm" => "text/html",
+        "css" => "text/css",
+        "js" => "application/javascript",
+        "json" => "application/json",
+        _ => "application/octet-stream",
     }
 }
