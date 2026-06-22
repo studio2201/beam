@@ -20,8 +20,8 @@ pub struct App {
     pub theme: String,
     
     // PIN entry inputs
-    pub pin_digits: Vec<String>,
-    pub pin_refs: Vec<NodeRef>,
+    pub pin_input: String,
+    pub pin_ref: NodeRef,
     pub error_message: Option<String>,
     pub is_lockout: bool,
     
@@ -68,8 +68,8 @@ impl Component for App {
             config: None,
             is_authenticated: false,
             theme,
-            pin_digits: Vec::new(),
-            pin_refs: Vec::new(),
+            pin_input: String::new(),
+            pin_ref: NodeRef::default(),
             error_message: None,
             is_lockout: false,
             upload_queue: Vec::new(),
@@ -91,7 +91,7 @@ impl Component for App {
         match msg {
             Msg::Nothing => false,
             Msg::LoadConfig(_) | Msg::ToggleTheme => self.update_config(ctx, msg),
-            Msg::PinDigitInput(_, _) | Msg::PinBackspace(_) | Msg::PinPaste(_) | Msg::VerifyPin | Msg::PinVerificationResult(_) | Msg::Logout => self.update_pin(ctx, msg),
+            Msg::PinInputChanged(_) | Msg::VerifyPin | Msg::PinVerificationResult(_) | Msg::Logout => self.update_pin(ctx, msg),
             Msg::DragOver(_) | Msg::FilesSelected(_) | Msg::FoldersSelected(_) | Msg::DropProcessed(_) | Msg::StartUploads | Msg::UploadInit(_, _) | Msg::UploadProgressUpdate(_, _, _, _, _) | Msg::UploadCompleted(_) | Msg::UploadFailed(_, _) => self.update_upload(ctx, msg),
             Msg::LoadFileList(_) | Msg::RefreshFiles | Msg::DeleteFile(_) | Msg::DeleteResult(_) | Msg::StartRename(_, _) | Msg::CancelRename | Msg::ConfirmRename | Msg::RenameInputChanged(_) | Msg::RenameResult(_) => self.update_files(ctx, msg),
             Msg::AddToast(_, _) | Msg::RemoveToast(_) => self.update_toast(ctx, msg),
@@ -109,19 +109,10 @@ impl App {
     }
     
     pub fn reset_pin_inputs(&mut self) {
-        for digit in &mut self.pin_digits {
-            *digit = "".to_string();
-        }
-        for r in &self.pin_refs {
-            if let Some(input) = r.cast::<web_sys::HtmlInputElement>() {
-                input.set_value("");
-            }
-        }
-        // Focus first PIN input
-        if !self.pin_refs.is_empty() {
-            if let Some(input) = self.pin_refs[0].cast::<web_sys::HtmlInputElement>() {
-                let _ = input.focus();
-            }
+        self.pin_input = String::new();
+        if let Some(input) = self.pin_ref.cast::<web_sys::HtmlInputElement>() {
+            input.set_value("");
+            let _ = input.focus();
         }
     }
 }

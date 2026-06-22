@@ -8,8 +8,10 @@
   --progress-bg: #f0f0f0;
   --primary-color: #2196f3;
   --secondary-color: #ccc;
-  --textarea-bg: rgba(255, 255, 255, 0.1);
   --danger-color: #f44336;
+  --header-bg: #f8fafc;
+  --textarea-bg: white;
+  --button-hover: #e5e7eb;
 }
 
 [data-theme='dark'] {
@@ -22,8 +24,10 @@
   --progress-bg: #404040;
   --primary-color: #2196f3;
   --secondary-color: #404040;
-  --textarea-bg: rgba(255, 255, 255, 0.05);
   --danger-color: #f44336;
+  --header-bg: #111111;
+  --textarea-bg: #2d2d2d;
+  --button-hover: #404040;
 }
 
 * {
@@ -49,7 +53,8 @@ body {
 
 .container {
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
   text-align: center;
   position: relative;
@@ -656,5 +661,124 @@ button:disabled {
     to {
         opacity: 0;
     }
+}
+
+/* Header & Controls from DumbPad */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: var(--header-bg);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+#header-title {
+    flex: 0 0 auto;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-align: center;
+}
+
+#header-title h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--text-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.icon-button:hover {
+    background-color: var(--button-hover);
+}
+
+.icon-button svg {
+    display: block;
+}
+
+/* Editor Container (writing area look for files explorer) */
+.editor-container {
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    background-color: var(--textarea-bg);
+    transition: background-color 0.3s, color 0.3s;
+    text-align: left;
+}
+
+/* Stylized Login Container & PIN input from DumbPad */
+#login-content {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    background-color: var(--container-bg);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    max-width: 400px;
+    width: 90%;
+    margin: 40px auto;
+}
+
+.login-container #theme-toggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--text-color);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.login-container #theme-toggle:hover {
+    background-color: var(--button-hover);
+}
+
+.pin-header h2 {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.pin-input-field {
+    text-align: center;
+    font-size: 2rem;
+    letter-spacing: 0.5em;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: block;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pin-input-field:focus {
+    border-color: var(--primary-color);
 }
 

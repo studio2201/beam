@@ -1,4 +1,4 @@
-use yew::prelude::{Context, NodeRef};
+use yew::prelude::Context;
 
 use crate::app::App;
 use crate::types::Msg;
@@ -11,9 +11,7 @@ impl App {
             Msg::LoadConfig(res) => {
                 match res {
                     Ok(conf) => {
-                        let pin_len = conf.pin_length;
-                        self.pin_digits = vec!["".to_string(); pin_len];
-                        self.pin_refs = (0..pin_len).map(|_| NodeRef::default()).collect();
+                        self.pin_input = String::new();
                         
                         let site_title = conf.site_title.clone();
                         self.config = Some(conf.clone());

@@ -7,94 +7,31 @@ use crate::api::{verify_pin_api, logout_api};
 impl App {
     pub fn update_pin(&mut self, ctx: &Context<Self>, msg: Msg) -> bool {
         match msg {
-            Msg::PinDigitInput(idx, val) => {
+            Msg::PinInputChanged(val) => {
                 if self.is_lockout {
                     return false;
                 }
                 
                 let filtered: String = val.chars().filter(|c| c.is_ascii_digit()).collect();
+                let max_len = self.config.as_ref().map(|c| c.pin_length).unwrap_or(4);
                 
-                if !filtered.is_empty() {
-                    // Update input value
-                    let single_char = filtered.chars().next().unwrap().to_string();
-                    self.pin_digits[idx] = single_char.clone();
-                    
-                    if let Some(input) = self.pin_refs[idx].cast::<web_sys::HtmlInputElement>() {
-                        input.set_value(&single_char);
+                if filtered.len() <= max_len {
+                    self.pin_input = filtered.clone();
+                    if let Some(input) = self.pin_ref.cast::<web_sys::HtmlInputElement>() {
+                        input.set_value(&self.pin_input);
                     }
                     
-                    // Move focus
-                    if idx < self.pin_digits.len() - 1 {
-                        if let Some(next_input) = self.pin_refs[idx + 1].cast::<web_sys::HtmlInputElement>() {
-                            let _ = next_input.focus();
-                        }
-                    } else {
-                        // Submit on last digit filled
-                        if self.pin_digits.iter().all(|d| !d.is_empty()) {
-                            ctx.link().send_message(Msg::VerifyPin);
-                        }
-                    }
-                } else {
-                    self.pin_digits[idx] = "".to_string();
-                    if let Some(input) = self.pin_refs[idx].cast::<web_sys::HtmlInputElement>() {
-                        input.set_value("");
-                    }
-                }
-                true
-            }
-            
-            Msg::PinBackspace(idx) => {
-                if self.is_lockout {
-                    return false;
-                }
-                
-                if self.pin_digits[idx].is_empty() && idx > 0 {
-                    self.pin_digits[idx - 1] = "".to_string();
-                    if let Some(prev_input) = self.pin_refs[idx - 1].cast::<web_sys::HtmlInputElement>() {
-                        prev_input.set_value("");
-                        let _ = prev_input.focus();
-                    }
-                    true
-                } else {
-                    false
-                }
-            }
-            
-            Msg::PinPaste(text) => {
-                if self.is_lockout {
-                    return false;
-                }
-                
-                let digits: Vec<char> = text.chars().filter(|c| c.is_ascii_digit()).collect();
-                if digits.is_empty() {
-                    return false;
-                }
-                
-                for (i, digit) in digits.into_iter().enumerate() {
-                    if i < self.pin_digits.len() {
-                        self.pin_digits[i] = digit.to_string();
-                        if let Some(input) = self.pin_refs[i].cast::<web_sys::HtmlInputElement>() {
-                            input.set_value(&digit.to_string());
-                        }
-                    }
-                }
-                
-                if self.pin_digits.iter().all(|d| !d.is_empty()) {
-                    ctx.link().send_message(Msg::VerifyPin);
-                } else {
-                    // Find first empty index and focus it
-                    if let Some(first_empty) = self.pin_digits.iter().position(|d| d.is_empty()) {
-                        if let Some(input) = self.pin_refs[first_empty].cast::<web_sys::HtmlInputElement>() {
-                            let _ = input.focus();
-                        }
+                    if self.pin_input.len() == max_len {
+                        ctx.link().send_message(Msg::VerifyPin);
                     }
                 }
                 true
             }
             
             Msg::VerifyPin => {
-                let pin = self.pin_digits.join("");
-                if pin.len() < self.pin_digits.len() {
+                let pin = self.pin_input.clone();
+                let expected_len = self.config.as_ref().map(|c| c.pin_length).unwrap_or(4);
+                if pin.len() < expected_len {
                     return false;
                 }
                 

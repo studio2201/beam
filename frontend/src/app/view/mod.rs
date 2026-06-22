@@ -13,65 +13,58 @@ impl App {
 
         html! {
             <div class="container">
-                // Theme Toggle
-                <button class="theme-toggle" onclick={ctx.link().callback(|_| Msg::ToggleTheme)} aria-label="Toggle theme">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="theme-toggle-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      {if self.theme == "light" {
-                          html! {
-                              <path class="moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                          }
-                      } else {
-                          html! {
-                              <>
-                                  <circle class="sun" cx="12" cy="12" r="5" />
-                                  <line class="sun" x1="12" y1="1" x2="12" y2="3" />
-                                  <line class="sun" x1="12" y1="21" x2="12" y2="23" />
-                                  <line class="sun" x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                                  <line class="sun" x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                                  <line class="sun" x1="1" y1="12" x2="3" y2="12" />
-                                  <line class="sun" x1="21" y1="12" x2="23" y2="12" />
-                                  <line class="sun" x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                                  <line class="sun" x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                              </>
-                          }
-                      }}
-                    </svg>
-                </button>
-                
-                <h1>{site_title}</h1>
-                
                 {if !self.is_authenticated {
                     self.render_pin_entry(ctx)
                 } else {
                     html! {
                         <>
-                            {self.render_uploader(ctx)}
-                            
-                            {if self.config.as_ref().map(|c| c.show_file_list).unwrap_or(false) {
-                                self.render_explorer(ctx)
-                            } else {
-                                // Logout button when file list is hidden but PIN is required
-                                if self.config.as_ref().map(|c| c.pin_required).unwrap_or(false) {
-                                    html! {
-                                        <div class="uploaded-files-stats" style="justify-content: center; margin-top: 20px;">
-                                            <button class="refresh-btn" style="background-color: var(--danger-color); padding: 8px 16px;" onclick={ctx.link().callback(|_| Msg::Logout)}>
-                                                {"Logout"}
+                            <header>
+                                <div class="notepad-controls">
+                                    <button id="refresh-button" class="icon-button" onclick={ctx.link().callback(|_| Msg::RefreshFiles)} data-tooltip="Refresh Files">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div id="header-title">
+                                    <h1>{site_title}</h1>
+                                </div>
+                                <div class="header-right">
+                                    <button id="theme-toggle" class="icon-button" onclick={ctx.link().callback(|_| Msg::ToggleTheme)} aria-label="Toggle theme">
+                                        {if self.theme == "dark" {
+                                            html! { <svg id="sun-icon" class="sun" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="M4.93 4.93l1.41 1.41" /><path d="M17.66 17.66l1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="M6.34 17.66l-1.41 1.41" /><path d="M19.07 4.93l-1.41 1.41" /></svg> }
+                                        } else {
+                                            html! { <svg id="moon-icon" class="moon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg> }
+                                        }}
+                                    </button>
+                                    {if self.config.as_ref().map(|c| c.pin_required).unwrap_or(false) {
+                                        html! {
+                                            <button id="logout-button" class="icon-button" onclick={ctx.link().callback(|_| Msg::Logout)} data-tooltip="Log Out">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                                    <polyline points="16 17 21 12 16 7" />
+                                                    <line x1="21" y1="12" x2="9" y2="12" />
+                                                </svg>
                                             </button>
+                                        }
+                                    } else {
+                                        html! {}
+                                    }}
+                                </div>
+                            </header>
+                            <main>
+                                {self.render_uploader(ctx)}
+                                
+                                {if self.config.as_ref().map(|c| c.show_file_list).unwrap_or(false) {
+                                    html! {
+                                        <div class="editor-container" style="margin-top: 1.5rem; padding: 1.5rem; overflow-y: auto;">
+                                            {self.render_explorer(ctx)}
                                         </div>
                                     }
                                 } else {
                                     html! {}
-                                }
-                            }}
+                                }}
+                            </main>
                         </>
                     }
                 }}

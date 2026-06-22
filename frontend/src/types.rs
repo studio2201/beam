@@ -80,9 +80,7 @@ pub enum Msg {
     ToggleTheme,
     
     // Authentication / PIN digits
-    PinDigitInput(usize, String),
-    PinBackspace(usize),
-    PinPaste(String),
+    PinInputChanged(String),
     VerifyPin,
     PinVerificationResult(Result<bool, String>),
     Logout,

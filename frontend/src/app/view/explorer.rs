@@ -9,10 +9,10 @@ use crate::api::download_file;
 impl App {
     pub fn render_explorer(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div id="uploadedFilesList" class="uploaded-files-section">
-                <div class="uploaded-files-header">
-                    <h2>{"Uploaded Files"}</h2>
-                    <div class="uploaded-files-stats">
+            <div id="uploadedFilesList" class="uploaded-files-section" style="padding: 0; background: transparent; box-shadow: none; margin: 0;">
+                <div class="uploaded-files-header" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0;">{"Uploaded Files"}</h2>
+                    <div class="uploaded-files-stats" style="font-size: 0.9rem; color: var(--text-color-secondary);">
                         <span id="totalFiles">
                             {format!("{} file{}", 
                                 self.uploaded_files.as_ref().map(|f| f.total_files).unwrap_or(0),
@@ -23,18 +23,6 @@ impl App {
                         <span id="totalSize">
                             {self.uploaded_files.as_ref().map(|f| f.formatted_total_size.clone()).unwrap_or_else(|| "0 Bytes".to_string())}
                         </span>
-                        <button id="refreshFilesBtn" class="refresh-btn" onclick={ctx.link().callback(|_| Msg::RefreshFiles)}>
-                            {"🔄 Refresh"}
-                        </button>
-                        {if self.config.as_ref().map(|c| c.pin_required).unwrap_or(false) {
-                            html! {
-                                <button class="refresh-btn" style="background-color: var(--danger-color);" onclick={ctx.link().callback(|_| Msg::Logout)}>
-                                    {"Logout"}
-                                </button>
-                            }
-                        } else {
-                            html! {}
-                        }}
                     </div>
                 </div>
                 <div id="uploadedFilesContent" class="uploaded-files-content">
