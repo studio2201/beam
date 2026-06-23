@@ -1,28 +1,29 @@
 # Rust build artifacts
-/target
-/frontend/target
-/frontend/dist
+target/
+**/target/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Trunk build artifacts
+dist/
+frontend/dist/
+frontend/target/
+
+# Local configuration
+.env
+.env.local
+.env.*.local
+
+# Local databases and user data
+data/
+uploads/
+local_uploads/
+
+# IDE/Editor config
+.vscode/
+.idea/
 *.swp
 *.swo
+.cursor/
 
-# IDE settings
-.idea/
-.vscode/
-
-# Local environment & data
-.env
-.env.*
-!.env.example
-/uploads/
-/local_uploads/
-
-# Generated manifest assets
-/frontend/dist/asset-manifest.json
-/frontend/dist/manifest.json
-
-# Cache
-.cargo/
+# OS specific files
+.DS_Store
+Thumbs.db
