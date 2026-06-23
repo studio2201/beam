@@ -13,6 +13,7 @@ pub fn set_theme_attribute(theme: &str) {
     let document = web_sys::window().unwrap().document().unwrap();
     let html = document.document_element().unwrap();
     let _ = html.set_attribute("data-theme", theme);
+    let _ = html.set_attribute("class", theme);
 }
 
 pub fn format_file_size(bytes: u64) -> String {
