@@ -12,6 +12,7 @@ pub struct HeaderProps {
     pub on_logout: Callback<MouseEvent>,
     pub on_language_change: Callback<Language>,
     pub logout_tooltip: String,
+    pub disable_print: bool,
 }
 
 #[function_component(Header)]
@@ -79,6 +80,23 @@ pub fn header(props: &HeaderProps) -> Html {
         _ => "Toggle theme",
     };
 
+    let print_tooltip = match language {
+        Language::Chinese => "打印",
+        Language::Spanish => "Imprimir",
+        Language::German => "Drucken",
+        Language::Japanese => "印刷",
+        Language::French => "Imprimer",
+        Language::Portuguese => "Imprimir",
+        Language::Russian => "Печать",
+        _ => "Print",
+    };
+
+    let on_print = Callback::from(|_| {
+        if let Some(window) = web_sys::window() {
+            let _ = window.print();
+        }
+    });
+
     html! {
         <header>
             <div id="header-title">
@@ -104,6 +122,19 @@ pub fn header(props: &HeaderProps) -> Html {
                 </div>
                 <button id="theme-toggle" class="icon-button" onclick={on_toggle} aria-label="Toggle theme" title={theme_toggle_tooltip}>
                     {theme_toggle_icon}
+                </button>
+                <button
+                    id="print-button"
+                    class="icon-button"
+                    onclick={on_print}
+                    disabled={props.disable_print}
+                    title={print_tooltip}
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9" />
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                        <rect x="6" y="14" width="12" height="8" />
+                    </svg>
                 </button>
                 <button
                     id="logout-button"

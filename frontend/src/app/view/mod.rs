@@ -33,6 +33,7 @@ impl App {
                     on_logout={ctx.link().callback(|_| Msg::Logout)}
                     on_language_change={ctx.link().callback(Msg::SwitchLanguage)}
                     logout_tooltip={translations.log_out.to_string()}
+                    disable_print={self.uploaded_files.as_ref().map(|f| f.items.is_empty()).unwrap_or(true)}
                 />
                 <div class="container">
                     {if !self.is_authenticated {
