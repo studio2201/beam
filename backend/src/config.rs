@@ -91,7 +91,6 @@ impl AppConfig {
             .or_else(|_| env::var("SITE_TITLE"))
             .unwrap_or_else(|_| "RustDrop".to_string());
 
-
         let allowed_extensions = env::var("ALLOWED_EXTENSIONS")
             .ok()
             .filter(|s| !s.is_empty())
