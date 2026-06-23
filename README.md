@@ -1,5 +1,9 @@
 # RustDrop - High-Performance File Sharing
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/UberMetroid/RustDrop/main/frontend/Assets/assets/icon.png" alt="RustDrop Logo" width="128" height="128">
+</p>
+
 RustDrop is a lightweight, self-hosted, and high-performance file sharing web application. It features a modern, drag-and-drop web interface for uploading files and folders while maintaining their directory structures, built with a Rust (Axum/Tokio) backend and a WebAssembly (Yew) frontend.
 
 ---
