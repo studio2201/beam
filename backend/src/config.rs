@@ -86,8 +86,9 @@ impl AppConfig {
             .ok()
             .map(|ips| ips.split(',').map(|ip| ip.trim().to_string()).collect());
 
-        // Accept RUSTDROP_TITLE or SITE_TITLE
+        // Accept RUSTDROP_TITLE, RUSTDROP_SITE_TITLE, or SITE_TITLE
         let site_title = env::var("RUSTDROP_TITLE")
+            .or_else(|_| env::var("RUSTDROP_SITE_TITLE"))
             .or_else(|_| env::var("SITE_TITLE"))
             .unwrap_or_else(|_| "RustDrop".to_string());
 
