@@ -24,7 +24,6 @@ pub struct RenamePayload {
 
 pub async fn download_file(
     State(config): State<Arc<AppConfig>>,
-    _auth: RequirePin,
     Path(path): Path<String>,
 ) -> impl IntoResponse {
     let decoded_path = percent_encoding::percent_decode_str(&path)
