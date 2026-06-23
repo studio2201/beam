@@ -5,31 +5,19 @@ services:
     container_name: rustdrop
     restart: unless-stopped
     ports:
-      - ${RUSTDROP_PORT:-4401}:4401
+      - ${PORT:-4401}:4401
     volumes:
       - ${RUSTDROP_UPLOADS_PATH:-./uploads}:/app/uploads
       - ${RUSTDROP_DATA_PATH:-./data}:/app/data
     environment:
-      # Explicitly set directories inside the container
-      UPLOAD_DIR: /app/uploads
-      
-      # The site title shown in the web interface
-      RUSTDROP_TITLE: RustDrop
-      
-      # Maximum file size in MB
-      MAX_FILE_SIZE: 1024
-      
-      # Optional PIN protection (4-10 digits, leave empty to disable)
-      RUSTDROP_PIN: ${RUSTDROP_PIN:-123456}
-      
-      # Start uploading immediately upon file selection (true/false)
-      AUTO_UPLOAD: "true"
-      
-      # The base URL for the application (must end with a trailing slash)
-      BASE_URL: ${RUSTDROP_BASE_URL:-http://localhost:4401/}
-      
-      # Enable file listing, download, and deletion in the explorer UI (true/false)
-      SHOW_FILE_LIST: "true"
-      
       PORT: 4401
+      SITE_TITLE: ${RUSTDROP_TITLE:-RustDrop}
+      RUSTDROP_PIN: ${RUSTDROP_PIN:-}
+      BASE_URL: ${BASE_URL:-http://localhost:4401}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      TZ: ${TZ:-UTC}
+      MAX_FILE_SIZE: 1024
+      AUTO_UPLOAD: "true"
+      SHOW_FILE_LIST: "true"
+      UPLOAD_DIR: /app/uploads
       NODE_ENV: production
