@@ -43,7 +43,7 @@ impl App {
                                 <main>
                                     {self.render_uploader(ctx)}
 
-                                    <div style="margin-top: 1.5rem; padding: 0; overflow-y: auto;">
+                                    <div style="margin-top: 1.5rem; padding: 0; display: flex; flex-direction: column; flex: 1; min-height: 0;">
                                         {self.render_explorer(ctx)}
                                     </div>
                                 </main>

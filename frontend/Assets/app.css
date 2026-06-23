@@ -1,3 +1,15 @@
+html, body {
+    height: 100vh;
+    overflow: hidden;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
 /* Uploaded files listing styles */
 .uploaded-files-section {
     margin-top: 30px;
@@ -5,6 +17,10 @@
     background: var(--container);
     border-radius: 10px;
     border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .uploaded-files-header {
@@ -51,7 +67,8 @@
 }
 
 .uploaded-files-content {
-    max-height: 400px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: auto;
 }
