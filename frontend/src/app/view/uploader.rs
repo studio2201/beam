@@ -78,8 +78,8 @@ impl App {
         });
 
         html! {
-            <div class="login-container">
-                <div class="login-box">
+            <div class="login-container uploader-container">
+                <div class="login-box uploader-box">
                     <div
                         class={classes!("upload-container", self.drag_over.then_some("highlight"))}
                         ondragover={on_dragover}
@@ -91,8 +91,8 @@ impl App {
                         <div class="upload-content">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="50"
-                            height="50"
+                            width="36"
+                            height="36"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"

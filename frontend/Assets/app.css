@@ -1,5 +1,7 @@
 html, body {
-    height: 100vh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
 }
 
@@ -312,12 +314,20 @@ main {
     }
 }
 
+.uploader-container {
+    margin: 0.5rem auto 1rem auto;
+}
+
+.uploader-box {
+    padding: 1.25rem 1rem;
+}
+
 /* Drag & Drop Upload Container Styles */
 .upload-container {
     cursor: pointer;
     border: 2px dashed var(--border);
     border-radius: 12px;
-    padding: 2.5rem 2rem;
+    padding: 1rem 1rem;
     transition: all var(--transition);
     background: transparent;
     display: flex;
@@ -325,7 +335,7 @@ main {
     align-items: center;
     justify-content: center;
     outline: none;
-    min-height: 180px;
+    min-height: 100px;
 }
 
 .upload-container:hover {
@@ -350,6 +360,8 @@ main {
 .upload-content svg {
     color: var(--primary);
     transition: transform 0.3s ease;
+    width: 36px;
+    height: 36px;
 }
 
 .upload-container:hover .upload-content svg {
@@ -358,9 +370,9 @@ main {
 
 .upload-content p {
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.4;
 }
 
 .button-group {
