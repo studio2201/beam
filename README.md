@@ -63,14 +63,16 @@ Configure these settings inside your Docker Compose environment or container env
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
-| `PORT` | Port the web server listens on inside the container. | `4401` |
-| `BASE_URL` | Application base URL. | `http://localhost:4401/` |
+| `PORT` | The port number the backend HTTP server will bind to inside the container. | `4401` |
+| `SITE_TITLE` | Custom website title rendered in navigation headers, browser tabs, and PWA manifest. *(Supports fallback `RUSTRUSTDROP_TITLE`)* | `RustDrop` |
+| `BASE_URL` | Application base URL. Essential when deploying behind reverse proxies to ensure redirect and websocket links are resolved correctly. | `http://localhost:4401/` |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed HTTP request origins (CORS filter). Use `*` to allow all origins. | `*` |
+| `RUSTDROP_PIN` | Optional 4–10 digit PIN (numerical only) to lock access to the interface. Leave empty for public mode. | None |
+| `TZ` | Timezone for the container processes and logs. | `UTC` |
 | `UPLOAD_DIR` | Main directory path where uploaded files are stored. | `/app/uploads` |
 | `MAX_FILE_SIZE` | Maximum file size limit in MB. | `1024` (1GB) |
 | `AUTO_UPLOAD` | Start uploading immediately upon dragging files. | `false` |
 | `SHOW_FILE_LIST` | Enable file explorer listing/deletion interface. | `false` |
-| `RUSTDROP_PIN` | 4-10 digit PIN (numerical only) for upload protection. | None |
-| `RUSTDROP_TITLE` | Site title shown in headers and browser tab. | `RustDrop` |
 | `TRUST_PROXY` | Set `true` if backend is hosted behind a reverse proxy. | `false` |
 | `TRUSTED_PROXY_IPS` | Comma-separated IP list of trusted upstream proxies. | None |
 | `MAX_STORAGE_LIMIT_GB` | Maximum capacity limit for upload directory in GB. | None |
