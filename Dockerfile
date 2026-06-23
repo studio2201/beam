@@ -1,6 +1,6 @@
 # Stage 1: Build the Frontend (Yew WebAssembly)
 FROM rust:1.96-slim as frontend-builder
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install compilation dependencies and Trunk binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,12 +13,12 @@ RUN wget -qO- "https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trun
 COPY Cargo.toml Cargo.lock ./
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
-WORKDIR /usr/src/app/frontend
+WORKDIR /app/frontend
 RUN trunk build --release
 
 # Stage 2: Build the Backend
 FROM rust:1.96-slim as backend-builder
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install dependencies required to build native packages like openssl-sys
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,7 +33,7 @@ RUN cargo build --release --bin backend
 
 # Stage 3: Final package
 FROM debian:bookworm-slim
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install runtime dependencies (SSL certificates for HTTPS notification requests)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -43,10 +43,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PORT=4401
 ENV NODE_ENV=production
 
-COPY --from=backend-builder /usr/src/app/target/release/backend ./rustdrop
-COPY --from=frontend-builder /usr/src/app/frontend/dist ./frontend/dist
+COPY --from=backend-builder /app/target/release/backend ./rustdrop
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-RUN mkdir -p uploads data && chown -R 99:100 /usr/src/app
+RUN mkdir -p uploads data && chown -R 99:100 /app
 
 # Run as Unraid nobody:users
 USER 99:100

@@ -7,11 +7,11 @@ services:
     ports:
       - ${RUSTDROP_PORT:-4401}:4401
     volumes:
-      - ${RUSTDROP_UPLOADS_PATH:-./uploads}:/usr/src/app/uploads
-      - ${RUSTDROP_DATA_PATH:-./data}:/usr/src/app/data
+      - ${RUSTDROP_UPLOADS_PATH:-./uploads}:/app/uploads
+      - ${RUSTDROP_DATA_PATH:-./data}:/app/data
     environment:
       # Explicitly set directories inside the container
-      UPLOAD_DIR: /usr/src/app/uploads
+      UPLOAD_DIR: /app/uploads
       
       # The site title shown in the web interface
       RUSTDROP_TITLE: RustDrop
