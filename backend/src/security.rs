@@ -4,7 +4,7 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
-const MAX_ATTEMPTS: u32 = 5;
+
 const LOCKOUT_DURATION: Duration = Duration::from_secs(15 * 60);
 
 #[derive(Debug, Clone)]
@@ -27,7 +27,7 @@ pub fn reset_attempts(ip: &str) {
 pub fn is_locked_out(ip: &str) -> bool {
     if let Ok(mut attempts) = login_attempts().lock()
         && let Some(attempt) = attempts.get(ip)
-        && attempt.count >= MAX_ATTEMPTS
+        && attempt.count >= get_max_attempts()
     {
         if attempt.last_attempt.elapsed() < LOCKOUT_DURATION {
             return true;
@@ -73,7 +73,10 @@ pub fn safe_compare(a: &str, b: &str) -> bool {
 }
 
 pub fn get_max_attempts() -> u32 {
-    MAX_ATTEMPTS
+    std::env::var("MAX_ATTEMPTS")
+        .ok()
+        .and_then(|val| val.parse().ok())
+        .unwrap_or(5)
 }
 
 fn normalize_ip(ip: IpAddr) -> IpAddr {
