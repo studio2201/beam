@@ -4,7 +4,6 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
-
 const LOCKOUT_DURATION: Duration = Duration::from_secs(15 * 60);
 
 #[derive(Debug, Clone)]
@@ -129,7 +128,10 @@ pub fn hash_pin(pin: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(pin.as_bytes());
     let result = hasher.finalize();
-    result.iter().map(|b| format!("{:02x}", b)).collect::<String>()
+    result
+        .iter()
+        .map(|b| format!("{:02x}", b))
+        .collect::<String>()
 }
 
 pub async fn security_headers_middleware(
@@ -138,17 +140,25 @@ pub async fn security_headers_middleware(
 ) -> axum::response::Response {
     let mut response = next.run(req).await;
     let headers = response.headers_mut();
-    
-    headers.insert("X-Frame-Options", axum::http::header::HeaderValue::from_static("DENY"));
-    headers.insert("X-Content-Type-Options", axum::http::header::HeaderValue::from_static("nosniff"));
-    headers.insert("Referrer-Policy", axum::http::header::HeaderValue::from_static("strict-origin-when-cross-origin"));
+
+    headers.insert(
+        "X-Frame-Options",
+        axum::http::header::HeaderValue::from_static("DENY"),
+    );
+    headers.insert(
+        "X-Content-Type-Options",
+        axum::http::header::HeaderValue::from_static("nosniff"),
+    );
+    headers.insert(
+        "Referrer-Policy",
+        axum::http::header::HeaderValue::from_static("strict-origin-when-cross-origin"),
+    );
     headers.insert(
         "Content-Security-Policy", 
         axum::http::header::HeaderValue::from_static(
             "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: http: https:; font-src 'self'; manifest-src 'self';"
         )
     );
-    
+
     response
 }
-

@@ -13,8 +13,8 @@ use std::sync::Arc;
 
 use crate::config::AppConfig;
 use crate::security::{
-    get_client_ip, get_lockout_time_remaining, get_max_attempts, hash_pin, is_locked_out, record_attempt,
-    reset_attempts, safe_compare,
+    get_client_ip, get_lockout_time_remaining, get_max_attempts, hash_pin, is_locked_out,
+    record_attempt, reset_attempts, safe_compare,
 };
 
 // Extractor to require a valid PIN if one is configured
