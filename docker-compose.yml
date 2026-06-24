@@ -21,3 +21,6 @@ services:
       SHOW_FILE_LIST: "true"
       UPLOAD_DIR: /app/uploads
       NODE_ENV: production
+      ENABLE_TRANSLATION: ${ENABLE_TRANSLATION:-false}
+      MAX_ATTEMPTS: ${MAX_ATTEMPTS:-5}
+
