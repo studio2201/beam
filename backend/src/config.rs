@@ -19,6 +19,7 @@ pub struct AppConfig {
     pub max_storage_limit: Option<u64>,
     pub retention_period_days: Option<u64>,
     pub allowed_origins: String,
+    pub enable_translation: bool,
 }
 
 impl AppConfig {
@@ -124,6 +125,10 @@ impl AppConfig {
             .ok()
             .and_then(|s| s.parse::<u64>().ok());
 
+        let enable_translation = env::var("ENABLE_TRANSLATION")
+            .map(|v| v == "true" || v == "on")
+            .unwrap_or(false);
+
         Self {
             port,
             node_env,
@@ -141,6 +146,7 @@ impl AppConfig {
             max_storage_limit,
             retention_period_days,
             allowed_origins,
+            enable_translation,
         }
     }
 }

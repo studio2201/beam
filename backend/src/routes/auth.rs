@@ -112,7 +112,8 @@ async fn pin_required(State(config): State<Arc<AppConfig>>) -> Json<serde_json::
     let length = config.pin.as_ref().map(|p| p.len()).unwrap_or(0);
     Json(json!({
         "required": config.pin.is_some(),
-        "length": length
+        "length": length,
+        "enable_translation": config.enable_translation
     }))
 }
 

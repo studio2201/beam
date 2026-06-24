@@ -10,6 +10,8 @@ pub struct FrontendConfig {
     pub pin_length: usize,
     pub max_file_size: u64,
     pub client_max_retries: u32,
+    #[serde(default)]
+    pub enable_translation: bool,
 }
 
 #[derive(Deserialize, Debug, Clone)]
