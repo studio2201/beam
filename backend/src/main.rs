@@ -19,6 +19,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::config::AppConfig;
 use crate::routes::upload::{UploadState, start_batch_cleanup};
+use crate::security::security_headers_middleware;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -99,6 +100,7 @@ async fn main() {
             hsts_middleware,
         ))
         .layer(cors)
+        .layer(axum::middleware::from_fn(security_headers_middleware))
         .layer(Extension(config.clone()))
         .with_state(app_state);
 
