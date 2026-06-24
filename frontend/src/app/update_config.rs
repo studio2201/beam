@@ -44,11 +44,12 @@ impl App {
 
             Msg::ToggleTheme => {
                 self.theme = match self.theme.as_str() {
-                    "light" => "dark".to_string(),
-                    "dark" => "nord".to_string(),
-                    "nord" => "dracula".to_string(),
-                    "dracula" => "sepia".to_string(),
-                    _ => "light".to_string(),
+                    "crateria" => "brinstar".to_string(),
+                    "brinstar" => "norfair".to_string(),
+                    "norfair" => "wrecked_ship".to_string(),
+                    "wrecked_ship" => "maridia".to_string(),
+                    "maridia" => "tourian".to_string(),
+                    _ => "crateria".to_string(),
                 };
                 save_theme(&self.theme);
                 set_theme_attribute(&self.theme);

@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use crate::config::AppConfig;
 use crate::security::{
-    get_client_ip, get_lockout_time_remaining, get_max_attempts, is_locked_out, record_attempt,
+    get_client_ip, get_lockout_time_remaining, get_max_attempts, hash_pin, is_locked_out, record_attempt,
     reset_attempts, safe_compare,
 };
 
@@ -41,11 +41,13 @@ where
             let cookie_pin = jar.get("RUSTDROP_PIN").map(|c| c.value());
             let header_pin = parts.headers.get("x-pin").and_then(|h| h.to_str().ok());
 
-            let provided_pin = cookie_pin.or(header_pin);
+            let authenticated = match (cookie_pin, header_pin) {
+                (Some(cookie), _) => safe_compare(cookie, &hash_pin(pin)),
+                (None, Some(hdr)) => safe_compare(hdr, pin),
+                (None, None) => false,
+            };
 
-            if let Some(provided) = provided_pin
-                && safe_compare(provided, pin)
-            {
+            if authenticated {
                 return Ok(RequirePin);
             }
 
@@ -191,7 +193,7 @@ async fn verify_pin(
             .unwrap_or_else(|| config.base_url.starts_with("https"));
 
         // Build secure cookie
-        let secure_cookie = Cookie::build(("RUSTDROP_PIN", pin_str.to_string()))
+        let secure_cookie = Cookie::build(("RUSTDROP_PIN", hash_pin(pin_str)))
             .http_only(true)
             .secure(is_secure)
             .same_site(SameSite::Lax)

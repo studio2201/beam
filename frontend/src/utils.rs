@@ -2,7 +2,19 @@ use crate::storage::StorageService;
 use wasm_bindgen::JsValue;
 
 pub fn get_saved_theme() -> String {
-    StorageService::get_item("theme", "dark")
+    let raw = StorageService::get_item("theme", "crateria");
+    let theme = match raw.as_str() {
+        "light" => "brinstar".to_string(),
+        "dark" => "crateria".to_string(),
+        "nord" => "maridia".to_string(),
+        "dracula" => "wrecked_ship".to_string(),
+        "sepia" => "norfair".to_string(),
+        t => t.to_string(),
+    };
+    if theme != raw {
+        save_theme(&theme);
+    }
+    theme
 }
 
 pub fn save_theme(theme: &str) {

@@ -104,11 +104,12 @@ header {
     stroke: var(--primary);
 }
 
-#theme-toggle .sun { color: #f59e0b; }
-#theme-toggle .moon { color: #818cf8; }
-#theme-toggle .droplet { color: #88c0d0; }
-#theme-toggle .sparkles { color: #ff79c6; }
-#theme-toggle .coffee { color: #b58900; }
+#theme-toggle .cloud-rain { color: #818cf8; }
+#theme-toggle .leaf { color: #a3e635; }
+#theme-toggle .flame { color: #ff5555; }
+#theme-toggle .ghost { color: #ff79c6; }
+#theme-toggle .waves { color: #2dd4bf; }
+#theme-toggle .target { color: #22c55e; }
 
 .list-placeholder {
     flex: 1;
