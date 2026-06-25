@@ -24,6 +24,7 @@ pub struct AppConfig {
 
 impl AppConfig {
     pub fn load() -> Self {
+        let _ = dotenvy::from_path("/app/data/.env");
         let _ = dotenvy::dotenv();
 
         let port: u16 = env::var("PORT")
