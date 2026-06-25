@@ -1,4 +1,4 @@
-//! RustDrop Frontend Application
+//! Beam Frontend Application
 //!
 //! A clean, responsive file uploader built using Yew and WebAssembly.
 //! This module serves as the application entry point and mounts the

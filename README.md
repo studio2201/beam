@@ -1,10 +1,10 @@
-# RustDrop - High-Performance File Sharing
+# Beam - High-Performance File Sharing
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/UberMetroid/RustDrop/main/frontend/Assets/assets/icon.png" alt="RustDrop Logo" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/UberMetroid/Beam/main/frontend/Assets/assets/icon.png" alt="Beam Logo" width="128" height="128">
 </p>
 
-RustDrop is a lightweight, self-hosted, and high-performance file sharing web application. It features a modern, drag-and-drop web interface for uploading files and folders while maintaining their directory structures, built with a Rust (Axum/Tokio) backend and a WebAssembly (Yew) frontend.
+Beam is a lightweight, self-hosted, and high-performance file sharing web application. It features a modern, drag-and-drop web interface for uploading files and folders while maintaining their directory structures, built with a Rust (Axum/Tokio) backend and a WebAssembly (Yew) frontend.
 
 ---
 
@@ -17,9 +17,9 @@ RustDrop is a lightweight, self-hosted, and high-performance file sharing web ap
 ```yaml
 version: '3'
 services:
-  rustdrop:
-    image: ubermetroid/rustdrop:latest
-    container_name: rustdrop
+  beam:
+    image: ubermetroid/beam:latest
+    container_name: beam
     restart: unless-stopped
     ports:
       - 4401:4401
@@ -29,9 +29,9 @@ services:
       - PORT=4401
       - UPLOAD_DIR=/app/uploads
       - BASE_URL=http://localhost:4401/
-      - RUSTDROP_TITLE=RustDrop
+      - BEAM_TITLE=Beam
       - MAX_FILE_SIZE=1024
-      - RUSTDROP_PIN=123456
+      - BEAM_PIN=123456
       - AUTO_UPLOAD=true
       - SHOW_FILE_LIST=true
 ```
@@ -50,13 +50,13 @@ Run the following command to start the container:
 
 ```bash
 docker run -d \
-  --name rustdrop \
+  --name beam \
   --restart unless-stopped \
   -p 4401:4401 \
   -v $(pwd)/uploads:/app/uploads \
-  -e RUSTDROP_PIN=123456 \
+  -e BEAM_PIN=123456 \
   -e SHOW_FILE_LIST=true \
-  ubermetroid/rustdrop:latest
+  ubermetroid/beam:latest
 ```
 
 ---
@@ -68,10 +68,10 @@ Configure these settings inside your Docker Compose environment or container env
 | Variable | Description | Default |
 | :--- | :--- | :--- |
 | `PORT` | The port number the backend HTTP server will bind to inside the container. | `4401` |
-| `SITE_TITLE` | Custom website title rendered in navigation headers, browser tabs, and PWA manifest. *(Supports fallback `RUSTRUSTDROP_TITLE`)* | `RustDrop` |
+| `SITE_TITLE` | Custom website title rendered in navigation headers, browser tabs, and PWA manifest. *(Supports fallback `RUSTBEAM_TITLE`)* | `Beam` |
 | `BASE_URL` | Application base URL. Essential when deploying behind reverse proxies to ensure redirect and websocket links are resolved correctly. | `http://localhost:4401/` |
 | `ALLOWED_ORIGINS` | Comma-separated list of allowed HTTP request origins (CORS filter). Use `*` to allow all origins. | `*` |
-| `RUSTDROP_PIN` | Optional 4–10 digit PIN (numerical only) to lock access to the interface. Leave empty for public mode. | None |
+| `BEAM_PIN` | Optional 4–10 digit PIN (numerical only) to lock access to the interface. Leave empty for public mode. | None |
 | `TZ` | Timezone for the container processes and logs. | `UTC` |
 | `UPLOAD_DIR` | Main directory path where uploaded files are stored. | `/app/uploads` |
 | `MAX_FILE_SIZE` | Maximum file size limit in MB. | `1024` (1GB) |
@@ -157,3 +157,8 @@ Configure these settings inside your Docker Compose environment or container env
         ├── types.rs
         └── utils.rs
 ```
+
+
+---
+
+*Note: This repository was forked from [RustDrop](https://github.com/UberMetroid/RustDrop).*

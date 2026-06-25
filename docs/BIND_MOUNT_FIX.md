@@ -2,7 +2,7 @@
 
 ## Problem
 
-Files uploaded to RustDrop were disappearing when using Docker bind mounts (e.g., `-v ./uploads:/app/uploads`). The application only worked correctly with named Docker volumes.
+Files uploaded to Beam were disappearing when using Docker bind mounts (e.g., `-v ./uploads:/app/uploads`). The application only worked correctly with named Docker volumes.
 
 ### Root Cause
 
@@ -136,8 +136,8 @@ npm test -- test/path-validation.test.js
 
 ```yaml
 services:
-  rustdrop:
-    image: ubermetroid/rustdrop:latest
+  beam:
+    image: ubermetroid/beam:latest
     ports:
       - 3000:3000
     volumes:
@@ -150,15 +150,15 @@ services:
 
 ```yaml
 services:
-  rustdrop:
-    image: ubermetroid/rustdrop:latest
+  beam:
+    image: ubermetroid/beam:latest
     ports:
       - 3000:3000
     volumes:
-      - rustdrop_uploads:/app/uploads # Named volume
+      - beam_uploads:/app/uploads # Named volume
 
 volumes:
-  rustdrop_uploads:
+  beam_uploads:
 ```
 
 ### Verification Steps
@@ -203,8 +203,8 @@ The fix maintains security while improving compatibility:
 
 ## Related Commits
 
-- [d69a8b2](https://github.com/UberMetroid/RustDrop/commit/d69a8b25b4008f0a5f037ae56d9647651554af11) - Previous attempt (caused the issue)
-- [fc8bff9](https://github.com/UberMetroid/RustDrop/commit/fc8bff9a1422004d159e19bd5c698da77536a62f) - Related security improvements
+- [d69a8b2](https://github.com/UberMetroid/Beam/commit/d69a8b25b4008f0a5f037ae56d9647651554af11) - Previous attempt (caused the issue)
+- [fc8bff9](https://github.com/UberMetroid/Beam/commit/fc8bff9a1422004d159e19bd5c698da77536a62f) - Related security improvements
 
 ## Future Improvements
 

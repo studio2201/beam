@@ -74,8 +74,8 @@ impl AppConfig {
             .map(|val| val == "true")
             .unwrap_or(false);
 
-        // Accept RUSTDROP_PIN or PIN
-        let pin = env::var("RUSTDROP_PIN")
+        // Accept BEAM_PIN or PIN
+        let pin = env::var("BEAM_PIN")
             .or_else(|_| env::var("PIN"))
             .ok()
             .filter(|p| {
@@ -93,11 +93,11 @@ impl AppConfig {
             .ok()
             .map(|ips| ips.split(',').map(|ip| ip.trim().to_string()).collect());
 
-        // Accept RUSTDROP_TITLE, RUSTDROP_SITE_TITLE, or SITE_TITLE
-        let site_title = env::var("RUSTDROP_TITLE")
-            .or_else(|_| env::var("RUSTDROP_SITE_TITLE"))
+        // Accept BEAM_TITLE, BEAM_SITE_TITLE, or SITE_TITLE
+        let site_title = env::var("BEAM_TITLE")
+            .or_else(|_| env::var("BEAM_SITE_TITLE"))
             .or_else(|_| env::var("SITE_TITLE"))
-            .unwrap_or_else(|_| "RustDrop".to_string());
+            .unwrap_or_else(|_| "Beam".to_string());
 
         let allowed_extensions = env::var("ALLOWED_EXTENSIONS")
             .ok()

@@ -154,7 +154,7 @@ async fn main() {
         .with_state(app_state);
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));
-    tracing::info!("RustDrop server running on {}", config.base_url);
+    tracing::info!("Beam server running on {}", config.base_url);
     tracing::info!("Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();

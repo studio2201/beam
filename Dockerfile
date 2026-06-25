@@ -26,7 +26,7 @@ RUN cargo build --release --bin backend
 
 # Stage 3: Final package
 FROM alpine:latest
-LABEL org.opencontainers.image.source="https://github.com/UberMetroid/RustDrop"
+LABEL org.opencontainers.image.source="https://github.com/UberMetroid/Beam"
 WORKDIR /app
 
 # Install runtime dependencies (ca-certificates for HTTPS/SSL, wget for health checks)
@@ -36,7 +36,7 @@ ENV PORT=4401
 ENV NODE_ENV=production
 ENV LOG_DIR=/app/log
 
-COPY --from=backend-builder /app/target/release/backend ./rustdrop
+COPY --from=backend-builder /app/target/release/backend ./beam
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 RUN mkdir -p uploads data && chown -R 99:100 /app
@@ -46,4 +46,4 @@ USER 99:100
 
 EXPOSE 4401
 
-CMD ["./rustdrop"]
+CMD ["./beam"]

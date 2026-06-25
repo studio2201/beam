@@ -1,12 +1,12 @@
-// RustDrop Backend Routes Module
+// Beam Backend Routes Module
 //
-// This module registers and exports all route handlers for the RustDrop backend api.
+// This module registers and exports all route handlers for the Beam backend api.
 // This includes:
 // - User Authentication & PIN Verification (auth)
 // - File management and explorer operations (files)
 // - Chunked and chunkless upload handlers (upload)
 //
-// Copyright (c) 2026 RustDrop Authors. All rights reserved.
+// Copyright (c) 2026 Beam Authors. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

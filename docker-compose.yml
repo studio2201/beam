@@ -1,18 +1,18 @@
 services:
-  rustdrop:
+  beam:
     build: .
-    image: ubermetroid/rustdrop:latest
-    container_name: rustdrop
+    image: ubermetroid/beam:latest
+    container_name: beam
     restart: unless-stopped
     ports:
       - ${PORT:-4401}:4401
     volumes:
-      - ${RUSTDROP_UPLOADS_PATH:-./uploads}:/app/uploads
-      - ${RUSTDROP_DATA_PATH:-./data}:/app/data
+      - ${BEAM_UPLOADS_PATH:-./uploads}:/app/uploads
+      - ${BEAM_DATA_PATH:-./data}:/app/data
     environment:
       PORT: 4401
-      SITE_TITLE: ${RUSTDROP_TITLE:-RustDrop}
-      RUSTDROP_PIN: ${RUSTDROP_PIN:-}
+      SITE_TITLE: ${BEAM_TITLE:-Beam}
+      BEAM_PIN: ${BEAM_PIN:-}
       BASE_URL: ${BASE_URL:-http://localhost:4401}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
       TZ: ${TZ:-UTC}

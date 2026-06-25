@@ -1,12 +1,12 @@
 [package]
 name = "frontend"
-version = "1.2.2"
+version = "2.0.0"
 edition = "2024"
 authors = ["UberMetroid <admin@ubermetroid.com>"]
 license = "Apache-2.0"
-repository = "https://github.com/UberMetroid/RustDrop"
-homepage = "https://github.com/UberMetroid/RustDrop"
-description = "Yew frontend application for RustDrop."
+repository = "https://github.com/UberMetroid/Beam"
+homepage = "https://github.com/UberMetroid/Beam"
+description = "Yew frontend application for Beam."
 readme = "../README.md"
 
 [dependencies]

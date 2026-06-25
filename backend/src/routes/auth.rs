@@ -37,7 +37,7 @@ where
 
         if let Some(ref pin) = config.pin {
             let jar = CookieJar::from_headers(&parts.headers);
-            let cookie_pin = jar.get("RUSTDROP_PIN").map(|c| c.value());
+            let cookie_pin = jar.get("BEAM_PIN").map(|c| c.value());
             let header_pin = parts.headers.get("x-pin").and_then(|h| h.to_str().ok());
 
             let authenticated = match (cookie_pin, header_pin) {
@@ -140,7 +140,7 @@ async fn verify_pin(
 
     // 1. If PIN is not set in config, clear cookie and return success
     let Some(ref config_pin) = config.pin else {
-        let new_jar = jar.add(Cookie::build(("RUSTDROP_PIN", "")).path("/").build());
+        let new_jar = jar.add(Cookie::build(("BEAM_PIN", "")).path("/").build());
         let res = (
             StatusCode::OK,
             Json(VerifyPinResponse {
@@ -201,7 +201,7 @@ async fn verify_pin(
             .unwrap_or_else(|| config.base_url.starts_with("https"));
 
         // Build secure cookie
-        let secure_cookie = Cookie::build(("RUSTDROP_PIN", hash_pin(pin_str)))
+        let secure_cookie = Cookie::build(("BEAM_PIN", hash_pin(pin_str)))
             .http_only(true)
             .secure(is_secure)
             .same_site(SameSite::Lax)
@@ -251,7 +251,7 @@ async fn verify_pin(
 }
 
 async fn logout(jar: CookieJar) -> impl IntoResponse {
-    let new_jar = jar.add(Cookie::build(("RUSTDROP_PIN", "")).path("/").build());
+    let new_jar = jar.add(Cookie::build(("BEAM_PIN", "")).path("/").build());
     let res = (StatusCode::OK, Json(json!({ "success": true }))).into_response();
     (new_jar, res).into_response()
 }

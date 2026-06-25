@@ -12,8 +12,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/UberMetroid/RustDrop.git
-   cd RustDrop
+   git clone https://github.com/UberMetroid/Beam.git
+   cd Beam
    ```
 
 2. **Copy and configure environment variables**
@@ -27,7 +27,7 @@
      - `PORT=3000`
      - `LOCAL_UPLOAD_DIR=./local_uploads`
      - `MAX_FILE_SIZE=1024`
-     - `RUSTDROP_PIN=` (optional, for PIN protection)
+     - `BEAM_PIN=` (optional, for PIN protection)
 
 3. **Install dependencies**
 
@@ -43,7 +43,7 @@
 
    - You should see output like:
      ```
-     RustDrop server running on http://localhost:3000
+     Beam server running on http://localhost:3000
      ```
 
 5. **Open the app**
