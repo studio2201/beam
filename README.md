@@ -33,16 +33,22 @@ services:
     ports:
       - 4401:4401
     volumes:
+      - ./data:/app/data
       - ./uploads:/app/uploads
     environment:
       - PORT=4401
-      - UPLOAD_DIR=/app/uploads
-      - BASE_URL=http://localhost:4401/
-      - BEAM_TITLE=Beam
-      - MAX_FILE_SIZE=1024
-      - BEAM_PIN=123456
-      - AUTO_UPLOAD=true
-      - SHOW_FILE_LIST=true
+      - SITE_TITLE=Beam
+      - BASE_URL=http://localhost:4401
+      - ALLOWED_ORIGINS=*
+      - BEAM_PIN=1234
+      - TZ=UTC
+      - MAX_FILE_SIZE=20
+      - MAX_STORAGE_LIMIT_GB=100
+      - RETENTION_PERIOD_DAYS=30
+      - ALLOWED_EXTENSIONS=
+      - ENABLE_TRANSLATION=false
+      - ENABLE_THEMES=true
+      - ENABLE_PRINT=true
 ```
 
 2. Run the container:
