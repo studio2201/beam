@@ -10,46 +10,7 @@ mod pt;
 mod ru;
 mod zh;
 
-impl Language {
-    pub fn code(&self) -> &'static str {
-        match self {
-            Self::English => "en",
-            Self::Chinese => "zh",
-            Self::Spanish => "es",
-            Self::German => "de",
-            Self::Japanese => "ja",
-            Self::French => "fr",
-            Self::Portuguese => "pt",
-            Self::Russian => "ru",
-        }
-    }
 
-    pub fn label(&self) -> &'static str {
-        match self {
-            Self::English => "English",
-            Self::Chinese => "简体中文",
-            Self::Spanish => "Español",
-            Self::German => "Deutsch",
-            Self::Japanese => "日本語",
-            Self::French => "Français",
-            Self::Portuguese => "Português",
-            Self::Russian => "Русский",
-        }
-    }
-
-    pub fn all() -> &'static [Self] {
-        &[
-            Self::English,
-            Self::Chinese,
-            Self::Spanish,
-            Self::German,
-            Self::Japanese,
-            Self::French,
-            Self::Portuguese,
-            Self::Russian,
-        ]
-    }
-}
 
 pub struct Translations {
     pub enter_pin: &'static str,

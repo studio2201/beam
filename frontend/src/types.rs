@@ -75,17 +75,7 @@ pub struct RenameData {
     pub current_name: String,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum Language {
-    English,
-    Chinese,
-    Spanish,
-    German,
-    Japanese,
-    French,
-    Portuguese,
-    Russian,
-}
+pub use shared_assets::i18n::Language;
 
 pub enum Msg {
     Nothing,
