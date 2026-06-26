@@ -301,12 +301,17 @@ fn generate_pwa_manifest(config: &AppConfig) {
         "theme_color": "#000000",
         "icons": [
             {
-                "src": "/assets/icon.png",
+                "src": "favicon.svg",
+                "type": "image/svg+xml",
+                "sizes": "any"
+            },
+            {
+                "src": "favicon.png",
                 "type": "image/png",
                 "sizes": "192x192"
             },
             {
-                "src": "/assets/icon.png",
+                "src": "favicon.png",
                 "type": "image/png",
                 "sizes": "512x512"
             }
