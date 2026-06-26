@@ -11,10 +11,10 @@ services:
       - ${BEAM_DATA_PATH:-./data}:/app/data
     environment:
       PORT: 4401
-      SITE_TITLE: ${BEAM_TITLE:-Beam}
+      SITE_TITLE: ${BEAM_SITE_TITLE:-Beam}
       BEAM_PIN: ${BEAM_PIN:-}
-      BASE_URL: ${BASE_URL:-http://localhost:4401}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+      BASE_URL: ${BEAM_BASE_URL:-http://localhost:4401}
+      ALLOWED_ORIGINS: ${BEAM_ALLOWED_ORIGINS:-*}
       TZ: ${TZ:-UTC}
       MAX_FILE_SIZE: 1024
       AUTO_UPLOAD: "true"
@@ -22,5 +22,7 @@ services:
       UPLOAD_DIR: /app/uploads
       NODE_ENV: production
       ENABLE_TRANSLATION: ${ENABLE_TRANSLATION:-false}
+      ENABLE_THEMES: ${ENABLE_THEMES:-true}
+      ENABLE_PRINT: ${ENABLE_PRINT:-true}
       MAX_ATTEMPTS: ${MAX_ATTEMPTS:-5}
 
