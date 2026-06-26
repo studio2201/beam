@@ -123,16 +123,7 @@ pub fn get_client_ip(
     socket_ip.to_string()
 }
 
-pub fn hash_pin(pin: &str) -> String {
-    use sha2::{Digest, Sha256};
-    let mut hasher = Sha256::new();
-    hasher.update(pin.as_bytes());
-    let result = hasher.finalize();
-    result
-        .iter()
-        .map(|b| format!("{:02x}", b))
-        .collect::<String>()
-}
+
 
 pub async fn security_headers_middleware(
     req: axum::extract::Request,

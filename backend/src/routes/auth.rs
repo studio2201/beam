@@ -1,6 +1,6 @@
 use axum::{
     Json, Router,
-    extract::{ConnectInfo, FromRequestParts, State},
+    extract::{ConnectInfo, FromRequestParts, State, FromRef},
     http::{HeaderMap, StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use crate::config::AppConfig;
 use crate::security::{
-    get_client_ip, get_lockout_time_remaining, get_max_attempts, hash_pin, is_locked_out,
+    get_client_ip, get_lockout_time_remaining, get_max_attempts, is_locked_out,
     record_attempt, reset_attempts, safe_compare,
 };
 
@@ -22,18 +22,14 @@ pub struct RequirePin;
 
 impl<S> FromRequestParts<S> for RequirePin
 where
+    crate::AppState: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = Response;
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        let config = parts.extensions.get::<Arc<AppConfig>>().ok_or_else(|| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({ "error": "Internal config missing" })),
-            )
-                .into_response()
-        })?;
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let app_state = crate::AppState::from_ref(state);
+        let config = &app_state.config;
 
         if let Some(ref pin) = config.pin {
             let jar = CookieJar::from_headers(&parts.headers);
@@ -41,7 +37,7 @@ where
             let header_pin = parts.headers.get("x-pin").and_then(|h| h.to_str().ok());
 
             let authenticated = match (cookie_pin, header_pin) {
-                (Some(cookie), _) => safe_compare(cookie, &hash_pin(pin)),
+                (Some(cookie), _) => app_state.active_sessions.read().await.contains(cookie),
                 (None, Some(hdr)) => safe_compare(hdr, pin),
                 (None, None) => false,
             };
@@ -125,12 +121,13 @@ async fn pin_required(State(config): State<Arc<AppConfig>>) -> Json<serde_json::
 }
 
 async fn verify_pin(
-    State(config): State<Arc<AppConfig>>,
+    State(state): State<crate::AppState>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     headers: HeaderMap,
     jar: CookieJar,
     Json(payload): Json<VerifyPinPayload>,
 ) -> impl IntoResponse {
+    let config = &state.config;
     let ip = get_client_ip(
         &headers,
         addr,
@@ -200,8 +197,11 @@ async fn verify_pin(
             .map(|v| v.eq_ignore_ascii_case("https"))
             .unwrap_or_else(|| config.base_url.starts_with("https"));
 
+        let session_id = generate_session_id();
+        state.active_sessions.write().await.insert(session_id.clone());
+
         // Build secure cookie
-        let secure_cookie = Cookie::build(("BEAM_PIN", hash_pin(pin_str)))
+        let secure_cookie = Cookie::build(("BEAM_PIN", session_id))
             .http_only(true)
             .secure(is_secure)
             .same_site(SameSite::Lax)
@@ -250,8 +250,66 @@ async fn verify_pin(
     }
 }
 
-async fn logout(jar: CookieJar) -> impl IntoResponse {
+async fn logout(
+    State(state): State<crate::AppState>,
+    jar: CookieJar,
+) -> impl IntoResponse {
+    if let Some(cookie) = jar.get("BEAM_PIN") {
+        state.active_sessions.write().await.remove(cookie.value());
+    }
     let new_jar = jar.add(Cookie::build(("BEAM_PIN", "")).path("/").build());
     let res = (StatusCode::OK, Json(json!({ "success": true }))).into_response();
     (new_jar, res).into_response()
+}
+
+pub fn generate_session_id() -> String {
+    use std::fs::File;
+    use std::io::Read;
+    let file = File::open("/dev/urandom").ok();
+    let mut bytes = [0u8; 16];
+    if let Some(mut f) = file {
+        if f.read_exact(&mut bytes).is_ok() {
+            return bytes.iter().map(|b| format!("{:02x}", b)).collect();
+        }
+    }
+    let random_val = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    use sha2::{Digest, Sha256};
+    let mut hasher = Sha256::new();
+    hasher.update(random_val.to_string().as_bytes());
+    let result = hasher.finalize();
+    result.iter().map(|b| format!("{:02x}", b)).collect()
+}
+
+pub async fn rate_limit_middleware(
+    State(state): State<crate::AppState>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Result<Response, StatusCode> {
+    let addr = req
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|ci| ci.0);
+
+    let ip = get_client_ip(
+        req.headers(),
+        addr.unwrap_or_else(|| SocketAddr::from(([127, 0, 0, 1], 0))),
+        state.config.trust_proxy,
+        state.config.trusted_proxy_ips.as_deref(),
+    );
+
+    let ip_addr = ip.parse().unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST));
+
+    if !state.check_rate_limit(ip_addr).await {
+        let body = serde_json::json!({
+            "error": "Too many requests. Please slow down."
+        });
+        let mut response = axum::response::Json(body).into_response();
+        *response.status_mut() = StatusCode::TOO_MANY_REQUESTS;
+        return Ok(response);
+    }
+
+    Ok(next.run(req).await)
 }

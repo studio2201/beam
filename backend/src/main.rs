@@ -25,6 +25,38 @@ use crate::security::security_headers_middleware;
 pub struct AppState {
     pub config: Arc<AppConfig>,
     pub upload: Arc<UploadState>,
+    pub active_sessions: Arc<tokio::sync::RwLock<std::collections::HashSet<String>>>,
+    pub rate_limiter: Arc<tokio::sync::RwLock<std::collections::HashMap<std::net::IpAddr, Vec<std::time::Instant>>>>,
+}
+
+impl AppState {
+    pub async fn check_rate_limit(&self, ip: std::net::IpAddr) -> bool {
+        let max_requests = 100;
+        let window = std::time::Duration::from_secs(60);
+        let now = std::time::Instant::now();
+
+        let mut map = self.rate_limiter.write().await;
+        let timestamps = map.entry(ip).or_insert_with(Vec::new);
+        
+        timestamps.retain(|&t| now.duration_since(t) < window);
+
+        if timestamps.len() >= max_requests {
+            false
+        } else {
+            timestamps.push(now);
+            true
+        }
+    }
+
+    pub async fn clean_old_rate_limits(&self) {
+        let window = std::time::Duration::from_secs(60);
+        let now = std::time::Instant::now();
+        let mut map = self.rate_limiter.write().await;
+        map.retain(|_, timestamps| {
+            timestamps.retain(|&t| now.duration_since(t) < window);
+            !timestamps.is_empty()
+        });
+    }
 }
 
 impl FromRef<AppState> for Arc<AppConfig> {
@@ -102,7 +134,17 @@ async fn main() {
     let app_state = AppState {
         config: config.clone(),
         upload: upload_state.clone(),
+        active_sessions: Arc::new(tokio::sync::RwLock::new(std::collections::HashSet::new())),
+        rate_limiter: Arc::new(tokio::sync::RwLock::new(std::collections::HashMap::new())),
     };
+
+    let state_clone = app_state.clone();
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+            state_clone.clean_old_rate_limits().await;
+        }
+    });
 
     let _ = fs::create_dir_all(&config.upload_dir);
     let _ = fs::create_dir_all(config.upload_dir.join(".metadata"));
@@ -113,7 +155,11 @@ async fn main() {
     let api_routes = Router::new()
         .nest("/auth", crate::routes::auth::router())
         .nest("/upload", crate::routes::upload::router())
-        .nest("/files", crate::routes::files::router());
+        .nest("/files", crate::routes::files::router())
+        .layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            crate::routes::auth::rate_limit_middleware,
+        ));
 
     let cors = if config.allowed_origins == "*" {
         tower_http::cors::CorsLayer::permissive()

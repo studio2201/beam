@@ -80,9 +80,8 @@ impl AppConfig {
             .ok()
             .filter(|p| {
                 !p.is_empty()
-                    && p.chars().all(|c| c.is_ascii_digit())
                     && p.len() >= 4
-                    && p.len() <= 10
+                    && p.len() <= 64
             });
 
         let trust_proxy = env::var("TRUST_PROXY")
