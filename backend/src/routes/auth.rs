@@ -1,6 +1,6 @@
 use axum::{
     Json, Router,
-    extract::{ConnectInfo, FromRequestParts, State, FromRef},
+    extract::{ConnectInfo, FromRef, FromRequestParts, State},
     http::{HeaderMap, StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -13,8 +13,8 @@ use std::sync::Arc;
 
 use crate::config::AppConfig;
 use crate::security::{
-    get_client_ip, get_lockout_time_remaining, get_max_attempts, is_locked_out,
-    record_attempt, reset_attempts, safe_compare,
+    get_client_ip, get_lockout_time_remaining, get_max_attempts, is_locked_out, record_attempt,
+    reset_attempts, safe_compare,
 };
 
 // Extractor to require a valid PIN if one is configured
@@ -198,7 +198,11 @@ async fn verify_pin(
             .unwrap_or_else(|| config.base_url.starts_with("https"));
 
         let session_id = generate_session_id();
-        state.active_sessions.write().await.insert(session_id.clone());
+        state
+            .active_sessions
+            .write()
+            .await
+            .insert(session_id.clone());
 
         // Build secure cookie
         let secure_cookie = Cookie::build(("BEAM_PIN", session_id))
@@ -250,10 +254,7 @@ async fn verify_pin(
     }
 }
 
-async fn logout(
-    State(state): State<crate::AppState>,
-    jar: CookieJar,
-) -> impl IntoResponse {
+async fn logout(State(state): State<crate::AppState>, jar: CookieJar) -> impl IntoResponse {
     if let Some(cookie) = jar.get("BEAM_PIN") {
         state.active_sessions.write().await.remove(cookie.value());
     }
@@ -267,10 +268,10 @@ pub fn generate_session_id() -> String {
     use std::io::Read;
     let file = File::open("/dev/urandom").ok();
     let mut bytes = [0u8; 16];
-    if let Some(mut f) = file {
-        if f.read_exact(&mut bytes).is_ok() {
-            return bytes.iter().map(|b| format!("{:02x}", b)).collect();
-        }
+    if let Some(mut f) = file
+        && f.read_exact(&mut bytes).is_ok()
+    {
+        return bytes.iter().map(|b| format!("{:02x}", b)).collect();
     }
     let random_val = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -300,7 +301,9 @@ pub async fn rate_limit_middleware(
         state.config.trusted_proxy_ips.as_deref(),
     );
 
-    let ip_addr = ip.parse().unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST));
+    let ip_addr = ip
+        .parse()
+        .unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::LOCALHOST));
 
     if !state.check_rate_limit(ip_addr).await {
         let body = serde_json::json!({

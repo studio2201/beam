@@ -26,7 +26,9 @@ pub struct AppState {
     pub config: Arc<AppConfig>,
     pub upload: Arc<UploadState>,
     pub active_sessions: Arc<tokio::sync::RwLock<std::collections::HashSet<String>>>,
-    pub rate_limiter: Arc<tokio::sync::RwLock<std::collections::HashMap<std::net::IpAddr, Vec<std::time::Instant>>>>,
+    pub rate_limiter: Arc<
+        tokio::sync::RwLock<std::collections::HashMap<std::net::IpAddr, Vec<std::time::Instant>>>,
+    >,
 }
 
 impl AppState {
@@ -37,7 +39,7 @@ impl AppState {
 
         let mut map = self.rate_limiter.write().await;
         let timestamps = map.entry(ip).or_insert_with(Vec::new);
-        
+
         timestamps.retain(|&t| now.duration_since(t) < window);
 
         if timestamps.len() >= max_requests {
@@ -89,13 +91,11 @@ async fn main() {
             let _ = std::fs::create_dir_all(dir);
             let error_file = std::fs::OpenOptions::new()
                 .create(true)
-                .write(true)
                 .append(true)
                 .open(std::path::Path::new(dir).join("error.log"))
                 .ok();
             let app_file = std::fs::OpenOptions::new()
                 .create(true)
-                .write(true)
                 .append(true)
                 .open(std::path::Path::new(dir).join("app.log"))
                 .ok();

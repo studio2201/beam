@@ -78,11 +78,7 @@ impl AppConfig {
         let pin = env::var("BEAM_PIN")
             .or_else(|_| env::var("PIN"))
             .ok()
-            .filter(|p| {
-                !p.is_empty()
-                    && p.len() >= 4
-                    && p.len() <= 64
-            });
+            .filter(|p| !p.is_empty() && p.len() >= 4 && p.len() <= 64);
 
         let trust_proxy = env::var("TRUST_PROXY")
             .map(|val| val == "true")
@@ -132,10 +128,12 @@ impl AppConfig {
             .unwrap_or(false);
 
         let enable_themes = env::var("ENABLE_THEMES")
-            .map(|v| v == "true" || v == "on").unwrap_or(false);
+            .map(|v| v == "true" || v == "on")
+            .unwrap_or(false);
 
         let enable_print = env::var("ENABLE_PRINT")
-            .map(|v| v == "true" || v == "on").unwrap_or(false);
+            .map(|v| v == "true" || v == "on")
+            .unwrap_or(false);
 
         Self {
             port,

@@ -123,8 +123,6 @@ pub fn get_client_ip(
     socket_ip.to_string()
 }
 
-
-
 pub async fn security_headers_middleware(
     req: axum::extract::Request,
     next: axum::middleware::Next,
