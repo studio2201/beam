@@ -121,12 +121,12 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "shared-assets",
  "tokio",
  "tokio-util",
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "ubermetroid-shared",
 ]
 
 [[package]]
@@ -1231,6 +1231,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "shared-assets"
+version = "2.0.0"
+
+[[package]]
 name = "shlex"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1575,10 +1579,6 @@ name = "typenum"
 version = "1.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
-
-[[package]]
-name = "ubermetroid-shared"
-version = "2.0.0"
 
 [[package]]
 name = "unicase"
