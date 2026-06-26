@@ -1,0 +1,15 @@
+#!/bin/sh
+# postrm script for beam
+set -e
+
+case "$1" in
+    purge)
+        rm -rf /var/lib/beam
+        deluser --quiet --system beam 2>/dev/null || true
+        delgroup --quiet --system beam 2>/dev/null || true
+        rm -f /etc/default/beam
+        ;;
+esac
+
+#DEBHELPER#
+exit 0

@@ -1,0 +1,13 @@
+#!/bin/sh
+# prerm script for beam
+set -e
+
+case "$1" in
+    remove|purge)
+        # Best-effort cleanup; service is not managed by this package by default
+        pkill -f /usr/bin/beam 2>/dev/null || true
+        ;;
+esac
+
+#DEBHELPER#
+exit 0

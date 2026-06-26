@@ -1,0 +1,49 @@
+#!/bin/sh
+# postinst script for beam
+set -e
+
+case "$1" in
+    configure)
+        # Create system user (nobody:users with UID/GID 99/100 to match Unraid layout)
+        if ! getent group beam >/dev/null 2>&1; then
+            addgroup --system --gid 100 beam 2>/dev/null || true
+        fi
+        if ! getent passwd beam >/dev/null 2>&1; then
+            adduser --system --uid 99 --ingroup beam \
+                --home /var/lib/beam \
+                --no-create-home \
+                --shell /usr/sbin/nologin \
+                --gecos "Beam file sharing portal service account" \
+                beam 2>/dev/null || true
+        fi
+
+        # Create data directory
+        mkdir -p /var/lib/beam
+        chown beam:beam /var/lib/beam
+        chmod 755 /var/lib/beam
+
+        # Create default config file if missing
+        if [ ! -f /etc/default/beam ]; then
+            cat > /etc/default/beam << 'CFGEOF'
+# Default configuration for Beam file sharing portal
+# Override any value by uncommenting and editing.
+PORT=4401
+SITE_TITLE=Beam file sharing portal
+TZ=UTC
+CFGEOF
+            chmod 644 /etc/default/beam
+        fi
+
+        echo "==============================================="
+        echo "  Beam file sharing portal installed successfully"
+        echo "  Config:  /etc/default/beam"
+        echo "  Data:    /var/lib/beam"
+        echo "  Binary:  /usr/bin/beam"
+        echo ""
+        echo "  Start manually: beam"
+        echo "==============================================="
+        ;;
+esac
+
+#DEBHELPER#
+exit 0
