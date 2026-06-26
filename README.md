@@ -22,10 +22,16 @@ Beam is a lightweight, self-hosted, and high-performance file sharing web applic
 
 ## 📦 Container Registry
 
-The Docker image is published to the following registries:
+The Docker image is built with **Nix** (no Alpine, fully reproducible) and published to Docker Hub:
 
-*   **Docker Hub (Recommended)**: [ubermetroid/beam](https://hub.docker.com/r/ubermetroid/beam)
-*   **GitHub Container Registry (GHCR)**: [ghcr.io/ubermetroid/beam](https://github.com/UberMetroid/beam/pkgs/container/beam)
+*   **Docker Hub**: [ubermetroid/beam](https://hub.docker.com/r/ubermetroid/beam)
+
+The image can also be built locally from the Nix flake:
+
+```bash
+nix build .#dockerImage
+docker load < result
+```
 
 ---
 
@@ -73,10 +79,28 @@ docker compose up -d
 
 ### Building the Image Locally
 
-To build the Docker container locally from the source files:
+To build the Docker container locally from the source files using Nix:
 
 ```bash
-docker build -t ubermetroid/beam:latest .
+nix build .#dockerImage
+docker load < result
+docker tag beam-nix:latest ubermetroid/beam:latest
+```
+
+The image is Nix-built (no Alpine, no Docker daemon dependency for the build).
+For development iteration, use the devShell:
+
+```bash
+nix develop
+```
+
+### APT (Debian / Ubuntu)
+
+Beam is also distributed as a `.deb` package from the official UberMetroid APT repository:
+
+```bash
+curl -fsSL https://ubermetroid.github.io/packages/apt/install.sh | sudo bash
+sudo apt install beam
 ```
 
 
