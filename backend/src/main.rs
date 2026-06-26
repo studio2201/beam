@@ -148,6 +148,7 @@ async fn main() {
             app_state.clone(),
             hsts_middleware,
         ))
+        .layer(tower_http::trace::TraceLayer::new_for_http())
         .layer(cors)
         .layer(axum::middleware::from_fn(security_headers_middleware))
         .layer(Extension(config.clone()))
