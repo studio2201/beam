@@ -1,6 +1,6 @@
 [package]
 name = "backend"
-version = "2.1.1"
+version = "2.2.0"
 edition = "2024"
 authors = ["UberMetroid <admin@ubermetroid.com>"]
 license = "Apache-2.0"
@@ -10,11 +10,13 @@ description = "Axum backend service for Beam."
 readme = "../README.md"
 
 [dependencies]
+# Path-based for local development. Production builds use:
+#   shared-assets = { git = "https://github.com/UberMetroid/shared-assets", tag = "v3.0.0" }
 shared-assets = { path = "../frontend/Assets/shared-assets/shared-rust" }
 tokio = { version = "1.36", features = ["macros", "rt-multi-thread", "net", "fs", "time", "sync"] }
 tokio-util = { version = "0.7", features = ["io"] }
 axum = { version = "0.8", features = ["multipart"] }
-tower-http = { version = "0.6", features = ["fs", "cors", "trace", "limit"] }
+tower-http = { version = "0.6", features = ["fs", "limit"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dotenvy = "0.15"
@@ -24,6 +26,5 @@ axum-extra = { version = "0.12", features = ["cookie"] }
 rand = "0.8"
 chrono = { version = "0.4", default-features = false, features = ["std", "serde", "clock"] }
 percent-encoding = "2.3"
-constant_time_eq = "0.3"
 sha2 = "0.11"
-
+constant_time_eq = "0.3"

@@ -31,7 +31,7 @@ where
         let app_state = crate::AppState::from_ref(state);
         let config = &app_state.config;
 
-        if let Some(ref pin) = config.pin {
+        if let Some(ref pin) = config.server.pin {
             let jar = CookieJar::from_headers(&parts.headers);
             let cookie_pin = jar.get("BEAM_PIN").map(|c| c.value());
             let header_pin = parts.headers.get("x-pin").and_then(|h| h.to_str().ok());
@@ -98,29 +98,29 @@ pub fn router() -> Router<crate::AppState> {
 
 async fn get_config(State(config): State<Arc<AppConfig>>) -> Json<FrontendConfig> {
     Json(FrontendConfig {
-        site_title: config.site_title.clone(),
+        site_title: config.server.site_title.clone(),
         auto_upload: config.auto_upload,
         show_file_list: config.show_file_list,
-        pin_required: config.pin.is_some(),
-        pin_length: config.pin.as_ref().map(|p| p.len()).unwrap_or(0),
+        pin_required: config.server.pin.is_some(),
+        pin_length: config.server.pin.as_ref().map(|p| p.len()).unwrap_or(0),
         max_file_size: config.max_file_size,
         client_max_retries: config.client_max_retries,
-        enable_translation: config.enable_translation,
-        enable_themes: config.enable_themes,
-        enable_print: config.enable_print,
-        show_version: config.show_version,
-        show_github: config.show_github,
+        enable_translation: config.server.enable_translation,
+        enable_themes: config.server.enable_themes,
+        enable_print: config.server.enable_print,
+        show_version: config.server.show_version,
+        show_github: config.server.show_github,
     })
 }
 
 async fn pin_required(State(config): State<Arc<AppConfig>>) -> Json<serde_json::Value> {
-    let length = config.pin.as_ref().map(|p| p.len()).unwrap_or(0);
+    let length = config.server.pin.as_ref().map(|p| p.len()).unwrap_or(0);
     Json(json!({
-        "required": config.pin.is_some(),
+        "required": config.server.pin.is_some(),
         "length": length,
-        "enable_translation": config.enable_translation,
-        "enable_themes": config.enable_themes,
-        "enable_print": config.enable_print,
+        "enable_translation": config.server.enable_translation,
+        "enable_themes": config.server.enable_themes,
+        "enable_print": config.server.enable_print,
     }))
 }
 
@@ -140,7 +140,7 @@ async fn verify_pin(
     );
 
     // 1. If PIN is not set in config, clear cookie and return success
-    let Some(ref config_pin) = config.pin else {
+    let Some(ref config_pin) = config.server.pin else {
         let new_jar = jar.add(Cookie::build(("BEAM_PIN", "")).path("/").build());
         let res = (
             StatusCode::OK,
@@ -199,7 +199,7 @@ async fn verify_pin(
             .get("x-forwarded-proto")
             .and_then(|v| v.to_str().ok())
             .map(|v| v.eq_ignore_ascii_case("https"))
-            .unwrap_or_else(|| config.base_url.starts_with("https"));
+            .unwrap_or_else(|| config.server.base_url.starts_with("https"));
 
         let session_id = generate_session_id();
         state

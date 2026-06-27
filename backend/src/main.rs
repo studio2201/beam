@@ -161,7 +161,7 @@ async fn main() {
             crate::routes::auth::rate_limit_middleware,
         ));
 
-    let cors = if config.allowed_origins == "*" {
+    let cors = if config.server.allowed_origins == "*" {
         tower_http::cors::CorsLayer::permissive()
     } else {
         let mut cors = tower_http::cors::CorsLayer::new()
@@ -176,7 +176,7 @@ async fn main() {
                 axum::http::header::COOKIE,
                 axum::http::header::HeaderName::from_static("x-pin"),
             ]);
-        for origin in config.allowed_origins.split(',') {
+        for origin in config.server.allowed_origins.split(',') {
             if let Ok(parsed) = origin.trim().parse::<axum::http::HeaderValue>() {
                 cors = cors.allow_origin(parsed);
             }
@@ -201,8 +201,8 @@ async fn main() {
         .layer(Extension(config.clone()))
         .with_state(app_state);
 
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));
-    tracing::info!("Beam server running on {}", config.base_url);
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.server.port));
+    tracing::info!("Beam server running on {}", config.server.base_url);
     tracing::info!("Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
@@ -229,14 +229,14 @@ async fn serve_html(config: Arc<AppConfig>, req_path: &str) -> Response {
         Err(_) => return StatusCode::NOT_FOUND.into_response(),
     };
 
-    let base_url_with_slash = if config.base_url.ends_with('/') {
-        config.base_url.clone()
+    let base_url_with_slash = if config.server.base_url.ends_with('/') {
+        config.server.base_url.clone()
     } else {
-        format!("{}/", config.base_url)
+        format!("{}/", config.server.base_url)
     };
 
     let mut rendered = content
-        .replace("{{SITE_TITLE}}", &config.site_title)
+        .replace("{{SITE_TITLE}}", &config.server.site_title)
         .replace("{{BASE_URL}}", &base_url_with_slash);
 
     if req_path == "index.html" {
@@ -293,8 +293,8 @@ fn generate_pwa_manifest(config: &AppConfig) {
     }
 
     let pwa_manifest = serde_json::json!({
-        "name": &config.site_title,
-        "short_name": &config.site_title,
+        "name": &config.server.site_title,
+        "short_name": &config.server.site_title,
         "description": "A simple file upload application",
         "start_url": "/",
         "display": "standalone",
@@ -336,7 +336,7 @@ async fn hsts_middleware(
         .get("x-forwarded-proto")
         .and_then(|v| v.to_str().ok())
         .map(|v| v.eq_ignore_ascii_case("https"))
-        .unwrap_or_else(|| config.base_url.starts_with("https"));
+        .unwrap_or_else(|| config.server.base_url.starts_with("https"));
 
     let mut response = next.run(request).await;
 

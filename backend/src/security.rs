@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
+use constant_time_eq::constant_time_eq;
 
 const LOCKOUT_DURATION: Duration = Duration::from_secs(15 * 60);
 
@@ -68,7 +69,7 @@ pub fn get_lockout_time_remaining(ip: &str) -> u64 {
 }
 
 pub fn safe_compare(a: &str, b: &str) -> bool {
-    constant_time_eq::constant_time_eq(a.as_bytes(), b.as_bytes())
+    constant_time_eq(a.as_bytes(), b.as_bytes())
 }
 
 pub fn get_max_attempts() -> u32 {
