@@ -1,6 +1,6 @@
 use super::*;
-use std::path::{Path, PathBuf};
 use std::net::{SocketAddr, SocketAddrV4};
+use std::path::{Path, PathBuf};
 
 #[test]
 fn test_safe_compare() {
@@ -51,7 +51,10 @@ fn test_sanitize_path_preserve_dirs_safe_rejects_parent_traversal() {
     // the extension `bar` is reattached. The test asserts the actual
     // behavior — leading-dot trickery always becomes a safe name.
     let clean3 = utils::sanitize_path_preserve_dirs_safe("foo/..bar/baz");
-    assert_eq!(clean3, "foo/file.bar/baz", "leading dots are stripped from each part");
+    assert_eq!(
+        clean3, "foo/file.bar/baz",
+        "leading dots are stripped from each part"
+    );
 }
 
 #[test]
@@ -109,7 +112,10 @@ fn test_is_path_within_upload_dir_accepts_normal_paths() {
 
     assert!(check_under_upload(&existing_file, &tmp));
     // Inside an existing dir
-    assert!(check_under_upload(&tmp.join("subdir/never_created.txt"), &tmp));
+    assert!(check_under_upload(
+        &tmp.join("subdir/never_created.txt"),
+        &tmp
+    ));
 
     std::fs::remove_dir_all(&tmp).ok();
 }
@@ -209,10 +215,7 @@ fn test_get_client_ip_ignores_xff_without_trusted_list() {
     // regardless of whether the allowlist was set. The new behavior
     // requires the allowlist; without it, fall back to the socket IP.
     let ip = security::get_client_ip(
-        &headers,
-        socket,
-        true,
-        None, // no trusted list
+        &headers, socket, true, None, // no trusted list
     );
     assert_eq!(ip, "10.0.0.1");
 }

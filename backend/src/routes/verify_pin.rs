@@ -98,7 +98,11 @@ pub async fn verify_pin(
             .unwrap_or_else(|| config.server.base_url.starts_with("https"));
 
         let session_id = generate_session_id();
-        state.active_sessions.write().await.insert(session_id.clone());
+        state
+            .active_sessions
+            .write()
+            .await
+            .insert(session_id.clone());
         let cookie = Cookie::build(("BEAM_PIN", session_id))
             .http_only(true)
             .secure(is_secure)

@@ -10,8 +10,6 @@ mod pt;
 mod ru;
 mod zh;
 
-
-
 pub struct Translations {
     pub enter_pin: &'static str,
     pub locked_out: &'static str,

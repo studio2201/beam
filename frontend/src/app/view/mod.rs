@@ -24,7 +24,10 @@ impl App {
         let show_version = self.config.as_ref().map(|c| c.show_version).unwrap_or(true);
         let show_github = self.config.as_ref().map(|c| c.show_github).unwrap_or(true);
         let version = env!("CARGO_PKG_VERSION").to_string();
-        let version_url = format!("https://github.com/UberMetroid/beam/releases/tag/v{}", version);
+        let version_url = format!(
+            "https://github.com/UberMetroid/beam/releases/tag/v{}",
+            version
+        );
 
         html! {
             <>

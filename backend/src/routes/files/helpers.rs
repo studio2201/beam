@@ -137,13 +137,10 @@ pub fn count_files(items: &[FileItem]) -> u64 {
 /// `application/octet-stream` and force `Content-Disposition: attachment`
 /// so the browser downloads the file rather than rendering it.
 const DANGEROUS_EXTENSIONS: &[&str] = &[
-    "html", "htm", "svg", "mht", "mhtml",
-    "xhtml", "xht",
-    "js", "mjs", "jsx", "ts", "tsx",
-    "xml", "xsl", "xslt", "rss", "atom",
-    "pdf",  // downloaded by default for safety (could be inline-rendered with a viewer)
-    "swf",
-    "html5",
+    "html", "htm", "svg", "mht", "mhtml", "xhtml", "xht", "js", "mjs", "jsx", "ts", "tsx", "xml",
+    "xsl", "xslt", "rss", "atom",
+    "pdf", // downloaded by default for safety (could be inline-rendered with a viewer)
+    "swf", "html5",
 ];
 
 pub fn is_dangerous_extension(ext: &str) -> bool {
@@ -235,8 +232,7 @@ mod tests {
     #[test]
     fn dangerous_extensions_get_octet_stream() {
         for ext in [
-            "html", "htm", "svg", "xhtml", "xht", "mhtml",
-            "js", "mjs", "xml", "xsl", "pdf",
+            "html", "htm", "svg", "xhtml", "xht", "mhtml", "js", "mjs", "xml", "xsl", "pdf",
         ] {
             let filename = format!("test.{ext}");
             assert_eq!(

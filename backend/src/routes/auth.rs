@@ -1,21 +1,18 @@
 use axum::{
     Json, Router,
     extract::{ConnectInfo, FromRef, FromRequestParts, State},
-    http::{HeaderMap, StatusCode, request::Parts},
+    http::{StatusCode, request::Parts},
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+use axum_extra::extract::cookie::{Cookie, CookieJar};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
 use crate::config::AppConfig;
-use crate::security::{
-    get_client_ip, get_lockout_time_remaining, get_max_attempts, is_locked_out, record_attempt,
-    reset_attempts, safe_compare,
-};
+use crate::security::{get_client_ip, safe_compare};
 
 // Extractor to require a valid PIN if one is configured
 pub struct RequirePin;

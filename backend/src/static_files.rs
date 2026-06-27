@@ -1,7 +1,7 @@
 //! Static file serving and HTML template rendering.
 
 use axum::extract::State;
-use axum::http::{header, HeaderValue, StatusCode};
+use axum::http::{HeaderValue, StatusCode, header};
 use axum::response::{IntoResponse, Redirect, Response};
 use std::path::Path;
 use std::sync::Arc;

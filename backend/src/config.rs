@@ -57,8 +57,10 @@ impl AppConfig {
                     .filter(|ip| !ip.is_empty())
                     .collect()
             }),
-            allowed_extensions: env::var("ALLOWED_EXTENSIONS").ok().filter(|s| !s.is_empty()).map(
-                |exts| {
+            allowed_extensions: env::var("ALLOWED_EXTENSIONS")
+                .ok()
+                .filter(|s| !s.is_empty())
+                .map(|exts| {
                     exts.split(',')
                         .map(|ext| {
                             let mut trimmed = ext.trim().to_lowercase();
@@ -68,8 +70,7 @@ impl AppConfig {
                             trimmed
                         })
                         .collect()
-                },
-            ),
+                }),
             client_max_retries: parse_or("CLIENT_MAX_RETRIES", 5u32),
             max_storage_limit: env::var("MAX_STORAGE_LIMIT_GB")
                 .ok()
@@ -84,14 +85,15 @@ impl AppConfig {
 }
 
 fn parse_bool(name: &str) -> bool {
-    env::var(name)
-        .map(|v| v == "true")
-        .unwrap_or(false)
+    env::var(name).map(|v| v == "true").unwrap_or(false)
 }
 
 fn parse_or<T>(name: &str, default: T) -> T
 where
     T: std::str::FromStr,
 {
-    env::var(name).ok().and_then(|v| v.parse().ok()).unwrap_or(default)
+    env::var(name)
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
 }

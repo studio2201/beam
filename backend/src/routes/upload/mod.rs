@@ -98,11 +98,7 @@ fn run_retention_cleanup(upload_dir: &std::path::Path, retention_days: u64) {
                 if age > max_age {
                     tracing::info!("Auto-retention: deleting expired file {:?}", path);
                     if let Err(e) = std::fs::remove_file(&path) {
-                        tracing::error!(
-                            "Failed to delete expired file {:?}: {}",
-                            path,
-                            e
-                        );
+                        tracing::error!("Failed to delete expired file {:?}: {}", path, e);
                         is_empty = false;
                     }
                 } else {

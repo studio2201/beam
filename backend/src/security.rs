@@ -88,10 +88,7 @@ pub fn get_client_ip(
         return socket_ip.to_string();
     }
 
-    let Some(forwarded) = headers
-        .get("x-forwarded-for")
-        .and_then(|h| h.to_str().ok())
-    else {
+    let Some(forwarded) = headers.get("x-forwarded-for").and_then(|h| h.to_str().ok()) else {
         return socket_ip.to_string();
     };
 
@@ -118,11 +115,13 @@ pub fn get_client_ip(
 
     let trusted_nets: Vec<IpNet> = trusted
         .iter()
-        .filter_map(|s| match (IpNet::from_str(s.trim()), s.trim().parse::<IpAddr>()) {
-            (Ok(net), _) => Some(net),
-            (Err(_), Ok(ip)) => IpNet::from_str(&format!("{ip}/32")).ok(),
-            _ => None,
-        })
+        .filter_map(
+            |s| match (IpNet::from_str(s.trim()), s.trim().parse::<IpAddr>()) {
+                (Ok(net), _) => Some(net),
+                (Err(_), Ok(ip)) => IpNet::from_str(&format!("{ip}/32")).ok(),
+                _ => None,
+            },
+        )
         .collect();
 
     if !trusted_nets.iter().any(|net| net.contains(&socket_ip)) {
