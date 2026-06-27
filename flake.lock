@@ -54,7 +54,8 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "rust-overlay": "rust-overlay"
+        "rust-overlay": "rust-overlay",
+        "shared-assets": "shared-assets"
       }
     },
     "rust-overlay": {
@@ -72,6 +73,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "shared-assets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782573364,
+        "narHash": "sha256-Iuwg3UKqrHO+lnYRHg8LLnIDeYJB1ygw6nTu9rKkNEg=",
+        "owner": "UberMetroid",
+        "repo": "shared-assets",
+        "rev": "4241b9d5a14bc5b2e4bb8d00a54202c3964d37db",
+        "type": "github"
+      },
+      "original": {
+        "owner": "UberMetroid",
+        "repo": "shared-assets",
         "type": "github"
       }
     },
