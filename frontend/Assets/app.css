@@ -464,9 +464,4 @@ main {
     width: 100%;
 }
 
-/* Hide print button if printing feature is disabled by configuration */
-body.print-feature-disabled #print-button {
-    display: none !important;
-}
-
 
