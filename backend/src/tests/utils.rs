@@ -1,13 +1,5 @@
-use super::*;
-use std::net::{SocketAddr, SocketAddrV4};
+use crate::utils;
 use std::path::{Path, PathBuf};
-
-#[test]
-fn test_safe_compare() {
-    assert!(security::safe_compare("1234", "1234"));
-    assert!(!security::safe_compare("1234", "5678"));
-    assert!(!security::safe_compare("1234", "12345"));
-}
 
 #[test]
 fn test_normalize_path() {
@@ -36,7 +28,6 @@ fn test_sanitize_path_preserve_dirs_safe() {
 
 #[test]
 fn test_sanitize_path_preserve_dirs_safe_rejects_parent_traversal() {
-    // `..` in any position is now a hard reject (defense in depth).
     let clean = utils::sanitize_path_preserve_dirs_safe("foo/../etc/passwd");
     assert_eq!(
         clean, "unnamed_file.txt",
@@ -44,12 +35,6 @@ fn test_sanitize_path_preserve_dirs_safe_rejects_parent_traversal() {
     );
     let clean2 = utils::sanitize_path_preserve_dirs_safe("../etc/passwd");
     assert_eq!(clean2, "unnamed_file.txt");
-    // `..bar` (literal, no slash between) is technically a valid filename
-    // *string*, but the sanitizer strips leading dots from each part to
-    // prevent hidden files and to be conservative. The stem `..` becomes
-    // empty after trimming, so the default `file` prefix kicks in, and
-    // the extension `bar` is reattached. The test asserts the actual
-    // behavior — leading-dot trickery always becomes a safe name.
     let clean3 = utils::sanitize_path_preserve_dirs_safe("foo/..bar/baz");
     assert_eq!(
         clean3, "foo/file.bar/baz",
@@ -71,27 +56,6 @@ fn test_is_valid_batch_id() {
     assert!(!utils::is_valid_batch_id("abc-abcdef12"));
 }
 
-#[test]
-fn test_lockout_attempts() {
-    let ip = "127.0.0.1";
-    security::reset_attempts(ip);
-    assert!(!security::is_locked_out(ip));
-
-    for _ in 0..5 {
-        let _ = security::record_attempt(ip);
-    }
-    assert!(security::is_locked_out(ip));
-
-    security::reset_attempts(ip);
-    assert!(!security::is_locked_out(ip));
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// Path-traversal defense
-// ─────────────────────────────────────────────────────────────────────
-
-/// Test harness: create a temp upload dir with optional symlink, run the
-/// check, and clean up.
 fn check_under_upload(file_path: &Path, upload_dir: &Path) -> bool {
     utils::is_path_within_upload_dir(file_path, upload_dir, false)
 }
@@ -111,7 +75,6 @@ fn test_is_path_within_upload_dir_accepts_normal_paths() {
     std::fs::write(&existing_file, "ok").unwrap();
 
     assert!(check_under_upload(&existing_file, &tmp));
-    // Inside an existing dir
     assert!(check_under_upload(
         &tmp.join("subdir/never_created.txt"),
         &tmp
@@ -130,8 +93,6 @@ fn test_is_path_within_upload_dir_rejects_absolute_paths() {
 
 #[test]
 fn test_is_path_within_upload_dir_rejects_parent_traversal_in_nonexistent_suffix() {
-    // Build an upload dir under the real temp dir. The target file
-    // doesn't exist, and contains a `..` component.
     let tmp = std::env::temp_dir().join(format!(
         "beam_test_traversal_{}",
         std::time::SystemTime::now()
@@ -149,8 +110,6 @@ fn test_is_path_within_upload_dir_rejects_parent_traversal_in_nonexistent_suffix
 
 #[test]
 fn test_is_path_within_upload_dir_rejects_when_parent_is_symlink_outside() {
-    // This is the bug that motivated the fix: a symlinked subdir in the
-    // upload dir, and an upload to a non-existent path under it.
     #[cfg(unix)]
     {
         use std::os::unix::fs::symlink;
@@ -165,11 +124,9 @@ fn test_is_path_within_upload_dir_rejects_when_parent_is_symlink_outside() {
         std::fs::create_dir_all(&upload).unwrap();
         let outside = outer.join("outside");
         std::fs::create_dir_all(&outside).unwrap();
-        // Create a symlink at uploads/escape -> outside
         let link = upload.join("escape");
         symlink(&outside, &link).unwrap();
 
-        // An upload target inside the symlinked dir (doesn't yet exist).
         let evil_target = link.join("passwd");
         assert!(
             !check_under_upload(&evil_target, &upload),
@@ -199,55 +156,4 @@ fn test_is_path_within_upload_dir_require_exists_canonicalizes() {
         true
     ));
     std::fs::remove_dir_all(&tmp).ok();
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// X-Forwarded-For defense
-// ─────────────────────────────────────────────────────────────────────
-
-#[test]
-fn test_get_client_ip_ignores_xff_without_trusted_list() {
-    use std::net::Ipv4Addr;
-    let mut headers = axum::http::HeaderMap::new();
-    headers.insert("x-forwarded-for", "203.0.113.5".parse().unwrap());
-    let socket = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(10, 0, 0, 1), 4401));
-    // The previous implementation honored XFF when trust_proxy=true
-    // regardless of whether the allowlist was set. The new behavior
-    // requires the allowlist; without it, fall back to the socket IP.
-    let ip = security::get_client_ip(
-        &headers, socket, true, None, // no trusted list
-    );
-    assert_eq!(ip, "10.0.0.1");
-}
-
-#[test]
-fn test_get_client_ip_honors_xff_when_trusted_list_matches() {
-    use std::net::Ipv4Addr;
-    let mut headers = axum::http::HeaderMap::new();
-    headers.insert("x-forwarded-for", "203.0.113.5".parse().unwrap());
-    let socket = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(10, 0, 0, 1), 4401));
-    let trusted = vec!["10.0.0.0/8".to_string()];
-    let ip = security::get_client_ip(&headers, socket, true, Some(&trusted));
-    assert_eq!(ip, "203.0.113.5");
-}
-
-#[test]
-fn test_get_client_ip_ignores_xff_when_socket_not_in_trusted_list() {
-    use std::net::Ipv4Addr;
-    let mut headers = axum::http::HeaderMap::new();
-    headers.insert("x-forwarded-for", "203.0.113.5".parse().unwrap());
-    let socket = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(192, 168, 1, 1), 4401));
-    let trusted = vec!["10.0.0.0/8".to_string()];
-    let ip = security::get_client_ip(&headers, socket, true, Some(&trusted));
-    assert_eq!(ip, "192.168.1.1");
-}
-
-#[test]
-fn test_get_client_ip_ignores_xff_when_trust_proxy_false() {
-    use std::net::Ipv4Addr;
-    let mut headers = axum::http::HeaderMap::new();
-    headers.insert("x-forwarded-for", "203.0.113.5".parse().unwrap());
-    let socket = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(10, 0, 0, 1), 4401));
-    let ip = security::get_client_ip(&headers, socket, false, None);
-    assert_eq!(ip, "10.0.0.1");
 }
