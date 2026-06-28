@@ -1,9 +1,9 @@
 use yew::prelude::*;
 
 use crate::app::App;
-use crate::types::Msg;
-use crate::components::header::Header;
 use crate::components::footer::Footer;
+use crate::components::header::Header;
+use crate::types::Msg;
 
 impl App {
     pub fn view_app(&self, ctx: &Context<Self>) -> Html {

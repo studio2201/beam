@@ -1,5 +1,5 @@
-use yew::prelude::Context;
 use shared_assets::theme::Theme;
+use yew::prelude::Context;
 
 use crate::app::App;
 use crate::types::Msg;

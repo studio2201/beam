@@ -1,6 +1,6 @@
 use crate::storage::StorageService;
-use wasm_bindgen::JsValue;
 use shared_assets::theme::{Theme, mapping::Scheme};
+use wasm_bindgen::JsValue;
 
 pub fn get_saved_theme() -> String {
     let raw = StorageService::get_item("theme", Theme::default().name());
@@ -17,7 +17,6 @@ pub fn get_saved_theme() -> String {
     }
     theme
 }
-
 
 pub fn save_theme(theme: &str) {
     StorageService::set_item("theme", theme);
