@@ -7,6 +7,19 @@ use crate::types::Msg;
 
 impl App {
     pub fn view_app(&self, ctx: &Context<Self>) -> Html {
+        let enable_print = self.config.as_ref().map(|c| c.enable_print).unwrap_or(false);
+        if let Some(window) = web_sys::window() {
+            if let Some(document) = window.document() {
+                if let Some(body) = document.body() {
+                    if enable_print {
+                        let _ = body.class_list().remove_1("print-feature-disabled");
+                    } else {
+                        let _ = body.class_list().add_1("print-feature-disabled");
+                    }
+                }
+            }
+        }
+
         let translations = crate::i18n::get_translations(self.language);
         let site_title = self
             .config
