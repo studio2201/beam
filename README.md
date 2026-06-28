@@ -8,7 +8,7 @@ Beam is a lightweight, self-hosted, and high-performance file sharing web applic
 
 ---
 
-## ⚡ Key Features
+## Key Features
 
 *   **Dynamic Themes**: Dynamic theme options.
 *   **Access PIN Security**: Lock down the interface with an optional numerical PIN for absolute privacy.
@@ -20,7 +20,7 @@ Beam is a lightweight, self-hosted, and high-performance file sharing web applic
 
 ---
 
-## 📦 Container Registry
+## Container Registry
 
 The Docker image is built with **Nix** (no Alpine, fully reproducible) and published to Docker Hub:
 
@@ -35,7 +35,7 @@ docker load < result
 
 ---
 
-## 🐳 Container Installation
+## Container Installation
 
 
 
@@ -94,7 +94,7 @@ For development iteration, use the devShell:
 nix develop
 ```
 
-## 📋 Configuration Options
+## Configuration Options
 
 Configure these settings inside your Docker Compose environment or container environment variables:
 
