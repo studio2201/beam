@@ -5,14 +5,15 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use axum_extra::extract::cookie::{Cookie, CookieJar};
+use axum_extra::extract::cookie::CookieJar;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::SocketAddr;
-use std::sync::Arc;
-
-use crate::config::AppConfig;
 use crate::security::{get_client_ip, safe_compare};
+
+pub mod verify_pin;
+pub mod logout;
+pub mod pin_required;
 
 // Extractor to require a valid PIN if one is configured
 pub struct RequirePin;
@@ -69,65 +70,12 @@ pub struct VerifyPinResponse {
     pub path: Option<String>,
 }
 
-#[derive(Serialize)]
-struct FrontendConfig {
-    site_title: String,
-    auto_upload: bool,
-    show_file_list: bool,
-    pin_required: bool,
-    pin_length: usize,
-    max_file_size: u64,
-    client_max_retries: u32,
-    enable_translation: bool,
-    enable_themes: bool,
-    enable_print: bool,
-    show_version: bool,
-    show_github: bool,
-}
-
 pub fn router() -> Router<crate::AppState> {
     Router::new()
-        .route("/pin-required", get(pin_required))
-        .route("/verify-pin", post(crate::routes::verify_pin::verify_pin))
-        .route("/logout", post(logout))
-        .route("/config", get(get_config))
-}
-
-async fn get_config(State(config): State<Arc<AppConfig>>) -> Json<FrontendConfig> {
-    Json(FrontendConfig {
-        site_title: config.server.site_title.clone(),
-        auto_upload: config.auto_upload,
-        show_file_list: config.show_file_list,
-        pin_required: config.server.pin.is_some(),
-        pin_length: config.server.pin.as_ref().map(|p| p.len()).unwrap_or(0),
-        max_file_size: config.max_file_size,
-        client_max_retries: config.client_max_retries,
-        enable_translation: config.server.enable_translation,
-        enable_themes: config.server.enable_themes,
-        enable_print: config.server.enable_print,
-        show_version: config.server.show_version,
-        show_github: config.server.show_github,
-    })
-}
-
-async fn pin_required(State(config): State<Arc<AppConfig>>) -> Json<serde_json::Value> {
-    let length = config.server.pin.as_ref().map(|p| p.len()).unwrap_or(0);
-    Json(json!({
-        "required": config.server.pin.is_some(),
-        "length": length,
-        "enable_translation": config.server.enable_translation,
-        "enable_themes": config.server.enable_themes,
-        "enable_print": config.server.enable_print,
-    }))
-}
-
-async fn logout(State(state): State<crate::AppState>, jar: CookieJar) -> impl IntoResponse {
-    if let Some(cookie) = jar.get("BEAM_PIN") {
-        state.active_sessions.write().await.remove(cookie.value());
-    }
-    let new_jar = jar.add(Cookie::build(("BEAM_PIN", "")).path("/").build());
-    let res = (StatusCode::OK, Json(json!({ "success": true }))).into_response();
-    (new_jar, res).into_response()
+        .route("/pin-required", get(pin_required::pin_required))
+        .route("/verify-pin", post(verify_pin::verify_pin))
+        .route("/logout", post(logout::logout))
+        .route("/config", get(pin_required::get_config))
 }
 
 pub fn generate_session_id() -> String {
