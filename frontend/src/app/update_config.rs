@@ -1,4 +1,4 @@
-use shared_assets::theme::Theme;
+use shared_frontend::theme::Theme;
 use yew::prelude::Context;
 
 use crate::app::App;

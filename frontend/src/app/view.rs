@@ -40,10 +40,11 @@ impl App {
                     on_logout={ctx.link().callback(|_| Msg::Logout)}
                     on_language_change={ctx.link().callback(Msg::SwitchLanguage)}
                     logout_tooltip={translations.log_out.to_string()}
-                    disable_print={self.uploaded_files.as_ref().map(|f| f.items.is_empty()).unwrap_or(true)}
+                    print_disabled={self.uploaded_files.as_ref().map(|f| f.items.is_empty()).unwrap_or(true)
+                        || self.config.as_ref().map(|c| !c.enable_print).unwrap_or(true)}
+                    on_print={None}
                     enable_translation={self.config.as_ref().map(|c| c.enable_translation).unwrap_or(false)}
                     enable_themes={self.config.as_ref().map(|c| c.enable_themes).unwrap_or(true)}
-                    enable_print={self.config.as_ref().map(|c| c.enable_print).unwrap_or(false)}
                 />
                 <div class="container">
                     {if !self.is_authenticated {

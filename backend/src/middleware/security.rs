@@ -3,22 +3,22 @@
 //! Historically this module contained full implementations of the
 //! constant-time PIN compare, the per-IP lockout state, the X-Forwarded-For
 //! parser, and the security headers. All of those are now provided by
-//! [`shared_assets`] — see:
+//! [`shared_backend`] — see:
 //!
-//! - `shared_assets::auth::{is_locked_out, record_attempt, reset_attempts,
+//! - `shared_backend::auth::{is_locked_out, record_attempt, reset_attempts,
 //!   lockout_remaining_secs}` — process-global per-IP lockout
-//! - `shared_assets::server::get_client_ip` — X-Forwarded-For with
+//! - `shared_backend::server::get_client_ip` — X-Forwarded-For with
 //!   trusted-proxy allowlist (no unsafe default when the allowlist is
 //!   empty)
-//! - `shared_assets::middleware::security_headers_layer` — replaces the
+//! - `shared_backend::middleware::security_headers_layer` — replaces the
 //!   `security_headers_middleware` axum function previously defined here
-//! - `shared_assets::middleware::hsts_layer` — replaces the
+//! - `shared_backend::middleware::hsts_layer` — replaces the
 //!   `hsts_middleware` axum function previously defined here
 //!
 //! This file exists as a thin adapter so existing call sites
 //! (`crate::security::{is_locked_out, record_attempt, ...}`) keep
 //! working without a large refactor. New code should prefer the
-//! `shared_assets` paths directly.
+//! `shared_backend` paths directly.
 
 use axum::http::HeaderMap;
 use constant_time_eq::constant_time_eq;
@@ -46,22 +46,22 @@ pub fn safe_compare(a: &str, b: &str) -> bool {
 
 /// Returns `true` if `ip` is currently locked out from further PIN attempts.
 pub fn is_locked_out(ip: &str) -> bool {
-    shared_assets::auth::is_locked_out(ip, get_max_attempts(), LOCKOUT_DURATION)
+    shared_backend::auth::is_locked_out(ip, get_max_attempts(), LOCKOUT_DURATION)
 }
 
 /// Record a failed PIN attempt for `ip` and return the updated record.
-pub fn record_attempt(ip: &str) -> shared_assets::auth::Attempt {
-    shared_assets::auth::record_attempt(ip)
+pub fn record_attempt(ip: &str) -> shared_backend::auth::Attempt {
+    shared_backend::auth::record_attempt(ip)
 }
 
 /// Clear the attempt record for `ip` (called after a successful login).
 pub fn reset_attempts(ip: &str) {
-    shared_assets::auth::reset_attempts(ip);
+    shared_backend::auth::reset_attempts(ip);
 }
 
 /// Seconds remaining in the lockout for `ip`, or `0` if not locked out.
 pub fn get_lockout_time_remaining(ip: &str) -> u64 {
-    shared_assets::auth::lockout_remaining_secs(ip, LOCKOUT_DURATION)
+    shared_backend::auth::lockout_remaining_secs(ip, LOCKOUT_DURATION)
 }
 
 /// Resolve the client IP from request metadata, with a trusted-proxy
@@ -82,7 +82,7 @@ pub fn get_client_ip(
 ) -> String {
     use ipnet::IpNet;
 
-    let socket_ip = shared_assets::server::normalize_ip(addr.ip());
+    let socket_ip = shared_backend::server::normalize_ip(addr.ip());
 
     if !trust_proxy {
         return socket_ip.to_string();
@@ -130,6 +130,6 @@ pub fn get_client_ip(
 
     trimmed
         .parse::<IpAddr>()
-        .map(shared_assets::server::normalize_ip)
+        .map(shared_backend::server::normalize_ip)
         .map_or_else(|_| socket_ip.to_string(), |ip| ip.to_string())
 }
