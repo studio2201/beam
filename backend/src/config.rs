@@ -49,7 +49,7 @@ impl AppConfig {
             upload_dir,
             max_file_size,
             auto_upload: parse_bool("AUTO_UPLOAD"),
-            show_file_list: parse_bool("SHOW_FILE_LIST"),
+            show_file_list: env::var("SHOW_FILE_LIST").map(|v| v != "false" && v != "off").unwrap_or(true),
             trust_proxy: parse_bool("TRUST_PROXY"),
             trusted_proxy_ips: env::var("TRUSTED_PROXY_IPS").ok().map(|ips| {
                 ips.split(',')

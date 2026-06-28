@@ -109,7 +109,7 @@ Configure these settings inside your Docker Compose environment or container env
 | `UPLOAD_DIR` | Main directory path where uploaded files are stored. | `/app/uploads` |
 | `MAX_FILE_SIZE` | Maximum file size limit in MB. | `1024` (1GB) |
 | `AUTO_UPLOAD` | Start uploading immediately upon dragging files. | `false` |
-| `SHOW_FILE_LIST` | Enable file explorer listing/deletion interface. | `false` |
+| `SHOW_FILE_LIST` | Enable file explorer listing/deletion interface. | `true` |
 | `TRUST_PROXY` | Set `true` if backend is hosted behind a reverse proxy. | `false` |
 | `TRUSTED_PROXY_IPS` | Comma-separated IP/CIDR list of trusted upstream proxies. | None |
 | `MAX_STORAGE_LIMIT_GB` | Maximum capacity limit for upload directory in GB. | None |
