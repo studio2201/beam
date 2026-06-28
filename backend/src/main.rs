@@ -1,9 +1,8 @@
 mod config;
-mod pwa;
+pub mod middleware;
 mod routes;
-mod security;
+pub mod services;
 mod state;
-mod static_files;
 #[cfg(test)]
 mod tests;
 mod utils;
@@ -14,10 +13,12 @@ use std::sync::Arc;
 use tracing_subscriber::{Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::config::AppConfig;
-use crate::pwa::generate_pwa_manifest;
+pub use crate::services::pwa;
+pub use crate::middleware::{security, static_files};
+use crate::services::pwa::generate_pwa_manifest;
 use crate::routes::upload::{UploadState, start_batch_cleanup};
 use crate::state::AppState;
-use crate::static_files::{serve_health, serve_index, serve_login};
+use crate::middleware::static_files::{serve_health, serve_index, serve_login};
 
 use shared_assets::middleware::hsts::{HstsState, hsts_layer};
 use shared_assets::middleware::title::{TitleState, title_injection_layer};
