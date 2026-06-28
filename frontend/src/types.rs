@@ -79,7 +79,7 @@ pub struct RenameData {
     pub current_name: String,
 }
 
-pub use shared_assets::i18n::Language;
+pub use shared_frontend::i18n::Language;
 
 pub enum Msg {
     Nothing,

@@ -19,11 +19,11 @@ use crate::services::pwa::generate_pwa_manifest;
 use crate::routes::upload::{UploadState, start_batch_cleanup};
 use crate::state::AppState;
 use crate::middleware::static_files::{serve_health, serve_index, serve_login};
+use shared_backend::middleware::hsts::{HstsState, hsts_layer};
 
-use shared_assets::middleware::hsts::{HstsState, hsts_layer};
-use shared_assets::middleware::title::{TitleState, title_injection_layer};
-use shared_assets::middleware::{cors_layer, security_headers_layer};
+use shared_backend::middleware::title::{TitleState, title_injection_layer};
 
+use shared_backend::middleware::{cors_layer, security_headers_layer};
 /// Server entry point.
 #[tokio::main]
 async fn main() {
@@ -121,7 +121,7 @@ fn build_router(config: Arc<AppConfig>, app_state: AppState) -> Router {
     // The shared-assets middleware needs a `&ServerConfig` / `Arc<ServerConfig>`.
     // Extract it from the app config so the rest of the file can keep using
     // `Arc<AppConfig>`.
-    let server_config: Arc<shared_assets::server::ServerConfig> = Arc::new(config.server.clone());
+    let server_config: Arc<shared_backend::server::ServerConfig> = Arc::new(config.server.clone());
 
     let api_routes = Router::new()
         .nest("/auth", crate::routes::auth::router())

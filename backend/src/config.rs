@@ -6,7 +6,7 @@
 use std::env;
 use std::path::PathBuf;
 
-use shared_assets::server::ServerConfig;
+use shared_backend::server::ServerConfig;
 
 /// Beam application configuration. Wraps [`ServerConfig`] with upload and
 /// retention settings that are specific to the file-sharing use case.

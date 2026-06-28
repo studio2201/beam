@@ -129,6 +129,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "shared-backend",
+ "shared-core",
  "tokio",
  "tokio-util",
  "tower-http",
@@ -336,6 +337,7 @@ dependencies = [
  "js-sys",
  "serde",
  "serde_json",
+ "shared-core",
  "shared-frontend",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -1257,7 +1259,7 @@ dependencies = [
 [[package]]
 name = "shared-backend"
 version = "3.0.0"
-source = "git+https://github.com/UberMetroid/shared-assets.git?branch=main#4f77b0b7d56b0e746d233da14f9757382a6fe81c"
+source = "git+https://github.com/UberMetroid/shared-assets.git?tag=v3.0.0#1eb8655a30943966b60e6f23972bfc59a3b6380c"
 dependencies = [
  "anyhow",
  "axum",
@@ -1276,7 +1278,7 @@ dependencies = [
 [[package]]
 name = "shared-core"
 version = "3.0.0"
-source = "git+https://github.com/UberMetroid/shared-assets.git?branch=main#4f77b0b7d56b0e746d233da14f9757382a6fe81c"
+source = "git+https://github.com/UberMetroid/shared-assets.git?tag=v3.0.0#1eb8655a30943966b60e6f23972bfc59a3b6380c"
 dependencies = [
  "constant_time_eq",
  "serde",
@@ -1285,7 +1287,7 @@ dependencies = [
 [[package]]
 name = "shared-frontend"
 version = "3.0.0"
-source = "git+https://github.com/UberMetroid/shared-assets.git?branch=main#4f77b0b7d56b0e746d233da14f9757382a6fe81c"
+source = "git+https://github.com/UberMetroid/shared-assets.git?tag=v3.0.0#1eb8655a30943966b60e6f23972bfc59a3b6380c"
 dependencies = [
  "serde",
  "shared-core",
