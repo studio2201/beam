@@ -1,4 +1,5 @@
 use yew::prelude::Context;
+use shared_assets::theme::Theme;
 
 use crate::app::App;
 use crate::types::Msg;
@@ -16,8 +17,8 @@ impl App {
                         self.config = Some(conf.clone());
 
                         if !conf.enable_themes {
-                            self.theme = "tourian".to_string();
-                            set_theme_attribute("tourian");
+                            self.theme = Theme::Tourian.name().to_string();
+                            set_theme_attribute(Theme::Tourian.name());
                         }
 
                         // Set document title dynamically
@@ -48,18 +49,21 @@ impl App {
             }
 
             Msg::ToggleTheme => {
-                self.theme = match self.theme.as_str() {
-                    "crateria" => "brinstar".to_string(),
-                    "brinstar" => "norfair".to_string(),
-                    "norfair" => "wrecked_ship".to_string(),
-                    "wrecked_ship" => "maridia".to_string(),
-                    "maridia" => "tourian".to_string(),
-                    _ => "crateria".to_string(),
+                let current = Theme::from_name(&self.theme).unwrap_or_default();
+                let next = match current {
+                    Theme::Brinstar => Theme::Norfair,
+                    Theme::Norfair => Theme::WreckedShip,
+                    Theme::WreckedShip => Theme::Maridia,
+                    Theme::Maridia => Theme::Tourian,
+                    Theme::Tourian => Theme::Crateria,
+                    Theme::Crateria => Theme::Brinstar,
                 };
+                self.theme = next.name().to_string();
                 save_theme(&self.theme);
                 set_theme_attribute(&self.theme);
                 true
             }
+
             Msg::SwitchLanguage(lang) => {
                 self.language = lang;
                 crate::i18n::save_language(lang);

@@ -7,6 +7,7 @@ use yew::prelude::*;
 use crate::app::App;
 use crate::types::Msg;
 
+
 impl App {
     pub fn render_view(&self, ctx: &Context<Self>) -> Html {
         let translations = crate::i18n::get_translations(self.language);
@@ -35,6 +36,7 @@ impl App {
                     site_title={site_title.to_string()}
                     theme={self.theme.clone()}
                     is_authenticated={self.is_authenticated}
+
                     pin_required={pin_required}
                     language={self.language}
                     toggle_theme={ctx.link().callback(|_| Msg::ToggleTheme)}
