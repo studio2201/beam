@@ -1,3 +1,4 @@
+use crate::security::{get_client_ip, safe_compare};
 use axum::{
     Json, Router,
     extract::{ConnectInfo, FromRef, FromRequestParts, State},
@@ -9,11 +10,10 @@ use axum_extra::extract::cookie::CookieJar;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::SocketAddr;
-use crate::security::{get_client_ip, safe_compare};
 
-pub mod verify_pin;
 pub mod logout;
 pub mod pin_required;
+pub mod verify_pin;
 
 // Extractor to require a valid PIN if one is configured
 pub struct RequirePin;

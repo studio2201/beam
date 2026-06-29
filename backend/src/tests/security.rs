@@ -29,9 +29,7 @@ fn test_get_client_ip_ignores_xff_without_trusted_list() {
     let mut headers = axum::http::HeaderMap::new();
     headers.insert("x-forwarded-for", "203.0.113.5".parse().unwrap());
     let socket = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(10, 0, 0, 1), 4401));
-    let ip = security::get_client_ip(
-        &headers, socket, true, None,
-    );
+    let ip = security::get_client_ip(&headers, socket, true, None);
     assert_eq!(ip, "10.0.0.1");
 }
 

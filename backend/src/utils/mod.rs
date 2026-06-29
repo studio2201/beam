@@ -1,5 +1,5 @@
-pub mod path;
 pub mod misc;
+pub mod path;
 
 pub use misc::{format_file_size, is_valid_batch_id};
 pub use path::{

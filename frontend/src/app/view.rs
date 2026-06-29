@@ -27,7 +27,11 @@ impl App {
             version
         );
 
-        let enable_print = self.config.as_ref().map(|c| c.enable_print).unwrap_or(false);
+        let enable_print = self
+            .config
+            .as_ref()
+            .map(|c| c.enable_print)
+            .unwrap_or(false);
 
         html! {
             <>

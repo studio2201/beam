@@ -13,12 +13,12 @@ use std::sync::Arc;
 use tracing_subscriber::{Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::config::AppConfig;
-pub use crate::services::pwa;
-pub use crate::middleware::{security, static_files};
-use crate::services::pwa::generate_pwa_manifest;
-use crate::routes::upload::{UploadState, start_batch_cleanup};
-use crate::state::AppState;
 use crate::middleware::static_files::{serve_health, serve_index, serve_login};
+pub use crate::middleware::{security, static_files};
+use crate::routes::upload::{UploadState, start_batch_cleanup};
+pub use crate::services::pwa;
+use crate::services::pwa::generate_pwa_manifest;
+use crate::state::AppState;
 use shared_backend::middleware::hsts::{HstsState, hsts_layer};
 
 use shared_backend::middleware::title::{TitleState, title_injection_layer};
