@@ -104,7 +104,7 @@
             WorkingDir = "/app";
             Env = [
               "PORT=4401"
-              "UPLOAD_DIR=/app/uploads"
+              "UPLOAD_DIR=/app/data/uploads"
             ];
             ExposedPorts = {
               "4401/tcp" = {};
@@ -122,7 +122,7 @@
           # Create /app directory structure inside the container
           extraCommands = ''
             mkdir -p app/data
-            mkdir -p app/uploads
+            mkdir -p app/data/uploads
             mkdir -p app/frontend
             cp -r ${frontend}/dist app/frontend/dist
                       mkdir -p bin
