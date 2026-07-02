@@ -26,18 +26,9 @@ The Docker image is built with **Nix** (no Alpine, fully reproducible) and publi
 
 *   **Docker Hub**: [ubermetroid/beam](https://hub.docker.com/r/ubermetroid/beam)
 
-The image can also be built locally from the Nix flake:
-
-```bash
-nix build .#dockerImage
-docker load < result
-```
-
 ---
 
 ## Container Installation
-
-
 
 1. Create a `docker-compose.yml` file:
 
