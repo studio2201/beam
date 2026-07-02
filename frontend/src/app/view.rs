@@ -41,12 +41,8 @@ impl App {
                     on_logout={ctx.link().callback(|_| Msg::Logout)}
                     on_language_change={ctx.link().callback(Msg::SwitchLanguage)}
                     logout_tooltip={translations.log_out.to_string()}
-                    print_disabled={!enable_print}
-                    on_print={Some(Callback::from(|_| {
-                        if let Some(w) = web_sys::window() {
-                            let _ = w.print();
-                        }
-                    }))}
+                    print_disabled={pin_required && !self.is_authenticated}
+                    on_print={Some(ctx.link().callback(|_| Msg::Print))}
                     enable_translation={self.config.as_ref().map(|c| c.enable_translation).unwrap_or(false)}
                     enable_themes={self.config.as_ref().map(|c| c.enable_themes).unwrap_or(true)}
                     enable_print={enable_print}

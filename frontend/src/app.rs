@@ -12,6 +12,7 @@ use yew::prelude::*;
 use crate::api::fetch_config;
 use crate::types::{FileListResponse, FrontendConfig, Language, Msg, RenameData, UploadProgress};
 use crate::utils::{get_saved_theme, set_theme_attribute};
+use shared_frontend::i18n::strings::{lookup, StringKey};
 
 pub struct App {
     // Configuration
@@ -120,14 +121,24 @@ impl Component for App {
             | Msg::RenameResult(_) => self.update_files(ctx, msg),
             Msg::AddToast(_, _) | Msg::RemoveToast(_) => self.update_toast(ctx, msg),
             Msg::OnlineStatusChanged(online) => {
-                let translations = crate::i18n::get_translations(self.language);
                 if online {
-                    self.show_toast(ctx, translations.online_restored, "success");
+                    self.show_toast(ctx, lookup(StringKey::StatusOnline, self.language), "success");
                     ctx.link().send_message(Msg::RefreshFiles);
                 } else {
-                    self.show_toast(ctx, translations.online_lost, "error");
+                    self.show_toast(ctx, lookup(StringKey::StatusOffline, self.language), "error");
                 }
                 true
+            }
+            Msg::Print => {
+                if let Some(window) = web_sys::window() {
+                    let print_res = window.print();
+                    if print_res.is_ok() {
+                        self.show_toast(ctx, lookup(StringKey::StatusPrintSuccess, self.language), "success");
+                    } else {
+                        self.show_toast(ctx, lookup(StringKey::StatusPrintFailure, self.language), "error");
+                    }
+                }
+                false
             }
         }
     }

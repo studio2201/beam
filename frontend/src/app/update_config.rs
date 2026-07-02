@@ -1,4 +1,5 @@
 use shared_frontend::theme::Theme;
+use shared_frontend::i18n::strings::{lookup, StringKey};
 use yew::prelude::Context;
 
 use crate::app::App;
@@ -61,6 +62,7 @@ impl App {
                 self.theme = next.name().to_string();
                 save_theme(&self.theme);
                 set_theme_attribute(&self.theme);
+                self.show_toast(ctx, lookup(StringKey::StatusThemeChanged, self.language), "success");
                 true
             }
 

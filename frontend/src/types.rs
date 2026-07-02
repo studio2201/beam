@@ -127,4 +127,5 @@ pub enum Msg {
 
     // Online/Offline status changed
     OnlineStatusChanged(bool),
+    Print,
 }

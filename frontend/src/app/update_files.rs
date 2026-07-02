@@ -3,6 +3,7 @@ use yew::prelude::*;
 use crate::api::{delete_file_api, fetch_files, rename_file_api};
 use crate::app::App;
 use crate::types::{Msg, RenameData};
+use shared_frontend::i18n::strings::{lookup, StringKey};
 
 impl App {
     pub fn update_files(&mut self, ctx: &Context<Self>, msg: Msg) -> bool {
@@ -107,6 +108,7 @@ impl App {
 
             Msg::ConfirmRename => {
                 if self.rename_input_val.trim().is_empty() {
+                    self.show_toast(ctx, lookup(StringKey::StatusValidationError, self.language), "error");
                     return false;
                 }
 
