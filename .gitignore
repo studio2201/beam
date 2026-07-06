@@ -31,3 +31,7 @@ Thumbs.db
 # Nix build artifacts
 result
 result-*
+
+# Vendored dependencies
+vendor/
+
