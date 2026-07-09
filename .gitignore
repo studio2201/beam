@@ -28,9 +28,6 @@ local_uploads/
 .DS_Store
 Thumbs.db
 
-# Nix build artifacts
-result
-result-*
 
 # Vendored dependencies
 vendor/
