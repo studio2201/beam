@@ -64,7 +64,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 LABEL org.opencontainers.image.title="beam" \
       org.opencontainers.image.description="beam (UBI9 minimal pilot)" \
-      org.opencontainers.image.source="https://github.com/UberMetroid/beam" \
+      org.opencontainers.image.source="https://github.com/etecoons/beam" \
       org.opencontainers.image.base.name="registry.access.redhat.com/ubi9/ubi-minimal"
 
 # ca-certificates for HTTPS outbound; wget for HEALTHCHECK.

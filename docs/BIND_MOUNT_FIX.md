@@ -203,8 +203,8 @@ The fix maintains security while improving compatibility:
 
 ## Related Commits
 
-- [d69a8b2](https://github.com/UberMetroid/Beam/commit/d69a8b25b4008f0a5f037ae56d9647651554af11) - Previous attempt (caused the issue)
-- [fc8bff9](https://github.com/UberMetroid/Beam/commit/fc8bff9a1422004d159e19bd5c698da77536a62f) - Related security improvements
+- [d69a8b2](https://github.com/etecoons/Beam/commit/d69a8b25b4008f0a5f037ae56d9647651554af11) - Previous attempt (caused the issue)
+- [fc8bff9](https://github.com/etecoons/Beam/commit/fc8bff9a1422004d159e19bd5c698da77536a62f) - Related security improvements
 
 ## Future Improvements
 

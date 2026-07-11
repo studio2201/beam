@@ -1,4 +1,4 @@
-# Beam — High-Performance File Sharing <img src="https://raw.githubusercontent.com/UberMetroid/unraid-templates/main/icons/beam.png" width="48" height="48" alt="beam logo" align="right">
+# Beam — High-Performance File Sharing <img src="https://raw.githubusercontent.com/etecoons/unraid-apps/main/icons/beam.png" width="48" height="48" alt="beam logo" align="right">
 
 Beam is a lightweight, self-hosted, and high-performance file sharing web application. It features a modern, drag-and-drop web interface for uploading files and folders while maintaining their directory structures. Built with a high-performance Rust (Axum/Tokio) backend and a WebAssembly (Yew) frontend.
 
