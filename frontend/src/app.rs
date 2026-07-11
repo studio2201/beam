@@ -12,7 +12,7 @@ use yew::prelude::*;
 use crate::api::fetch_config;
 use crate::types::{FileListResponse, FrontendConfig, Language, Msg, RenameData, UploadProgress};
 use crate::utils::{get_saved_theme, set_theme_attribute};
-use shared_frontend::i18n::strings::{lookup, StringKey};
+use shared_frontend::i18n::strings::{StringKey, lookup};
 
 pub struct App {
     // Configuration
@@ -122,10 +122,18 @@ impl Component for App {
             Msg::AddToast(_, _) | Msg::RemoveToast(_) => self.update_toast(ctx, msg),
             Msg::OnlineStatusChanged(online) => {
                 if online {
-                    self.show_toast(ctx, lookup(StringKey::StatusOnline, self.language), "success");
+                    self.show_toast(
+                        ctx,
+                        lookup(StringKey::StatusOnline, self.language),
+                        "success",
+                    );
                     ctx.link().send_message(Msg::RefreshFiles);
                 } else {
-                    self.show_toast(ctx, lookup(StringKey::StatusOffline, self.language), "error");
+                    self.show_toast(
+                        ctx,
+                        lookup(StringKey::StatusOffline, self.language),
+                        "error",
+                    );
                 }
                 true
             }
@@ -133,9 +141,17 @@ impl Component for App {
                 if let Some(window) = web_sys::window() {
                     let print_res = window.print();
                     if print_res.is_ok() {
-                        self.show_toast(ctx, lookup(StringKey::StatusPrintSuccess, self.language), "success");
+                        self.show_toast(
+                            ctx,
+                            lookup(StringKey::StatusPrintSuccess, self.language),
+                            "success",
+                        );
                     } else {
-                        self.show_toast(ctx, lookup(StringKey::StatusPrintFailure, self.language), "error");
+                        self.show_toast(
+                            ctx,
+                            lookup(StringKey::StatusPrintFailure, self.language),
+                            "error",
+                        );
                     }
                 }
                 false
@@ -151,20 +167,22 @@ impl Component for App {
         if first_render {
             use wasm_bindgen::JsCast;
             let window = web_sys::window().unwrap();
-            
+
             let link_online = ctx.link().clone();
-            let on_online = wasm_bindgen::prelude::Closure::<dyn FnMut(_)>::new(move |_: web_sys::Event| {
-                link_online.send_message(Msg::OnlineStatusChanged(true));
-            });
+            let on_online =
+                wasm_bindgen::prelude::Closure::<dyn FnMut(_)>::new(move |_: web_sys::Event| {
+                    link_online.send_message(Msg::OnlineStatusChanged(true));
+                });
             window
                 .add_event_listener_with_callback("online", on_online.as_ref().unchecked_ref())
                 .unwrap();
             on_online.forget();
 
             let link_offline = ctx.link().clone();
-            let on_offline = wasm_bindgen::prelude::Closure::<dyn FnMut(_)>::new(move |_: web_sys::Event| {
-                link_offline.send_message(Msg::OnlineStatusChanged(false));
-            });
+            let on_offline =
+                wasm_bindgen::prelude::Closure::<dyn FnMut(_)>::new(move |_: web_sys::Event| {
+                    link_offline.send_message(Msg::OnlineStatusChanged(false));
+                });
             window
                 .add_event_listener_with_callback("offline", on_offline.as_ref().unchecked_ref())
                 .unwrap();

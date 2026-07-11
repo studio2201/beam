@@ -1,5 +1,5 @@
+use shared_frontend::i18n::strings::{StringKey, lookup};
 use yew::prelude::*;
-use shared_frontend::i18n::strings::{lookup, StringKey};
 
 use crate::api::{logout_api, verify_pin_api};
 use crate::app::App;
@@ -62,18 +62,30 @@ impl App {
                         self.is_authenticated = true;
                         self.error_message = None;
                         self.is_lockout = false;
-                        self.show_toast(ctx, lookup(StringKey::StatusPinSuccess, self.language), "success");
+                        self.show_toast(
+                            ctx,
+                            lookup(StringKey::StatusPinSuccess, self.language),
+                            "success",
+                        );
                         ctx.link().send_message(Msg::RefreshFiles);
                     }
                     Ok(false) => {
                         self.error_message = Some("Invalid PIN".to_string());
-                        self.show_toast(ctx, lookup(StringKey::StatusPinFailure, self.language), "error");
+                        self.show_toast(
+                            ctx,
+                            lookup(StringKey::StatusPinFailure, self.language),
+                            "error",
+                        );
                         self.reset_pin_inputs();
                     }
                     Err(e) => {
                         if !e.is_empty() {
                             self.error_message = Some(e.clone());
-                            self.show_toast(ctx, lookup(StringKey::StatusPinFailure, self.language), "error");
+                            self.show_toast(
+                                ctx,
+                                lookup(StringKey::StatusPinFailure, self.language),
+                                "error",
+                            );
                             if e.contains("Too many") || e.contains("locked") {
                                 self.is_lockout = true;
                             } else {
@@ -91,7 +103,10 @@ impl App {
                 wasm_bindgen_futures::spawn_local(async move {
                     let _ = logout_api().await;
                     link.send_message(Msg::RefreshFiles);
-                    link.send_message(Msg::AddToast(lookup(StringKey::StatusLogout, lang).to_string(), "success".to_string()));
+                    link.send_message(Msg::AddToast(
+                        lookup(StringKey::StatusLogout, lang).to_string(),
+                        "success".to_string(),
+                    ));
                 });
                 self.is_authenticated = false;
                 self.reset_pin_inputs();

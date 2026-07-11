@@ -196,8 +196,16 @@ impl App {
         }
     }
 
-    fn validate_and_filter_files(&mut self, ctx: &Context<Self>, files: Vec<web_sys::File>) -> Vec<web_sys::File> {
-        let max_size = self.config.as_ref().map(|c| c.max_file_size).unwrap_or(20 * 1024 * 1024 * 1024);
+    fn validate_and_filter_files(
+        &mut self,
+        ctx: &Context<Self>,
+        files: Vec<web_sys::File>,
+    ) -> Vec<web_sys::File> {
+        let max_size = self
+            .config
+            .as_ref()
+            .map(|c| c.max_file_size)
+            .unwrap_or(20 * 1024 * 1024 * 1024);
         let mut valid_files = Vec::new();
         let mut too_large_files = Vec::new();
         for file in files {
