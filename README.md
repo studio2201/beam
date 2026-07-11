@@ -17,7 +17,7 @@ Beam is a lightweight, self-hosted, and high-performance file sharing web applic
 
 ---
 
-## 🟢 Key Features
+## Key Features
 * **Drag-and-Drop Uploads**: Upload files and complete folder structures seamlessly while preserving directory layouts.
 * **Access PIN Security**: Lock down the interface with an optional numerical PIN for absolute privacy.
 * **Quota & Retention**: Configurable total storage limits and automatic age-based file purges.
