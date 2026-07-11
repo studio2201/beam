@@ -5,7 +5,7 @@
 # Build stage: rust official image (reliable wasm32 + trunk). Runtime is pure UBI.
 #
 # Build (Podman):
-#   cd ~/Projects/ubermetroid/beam
+#   cd ~/Projects/etecoons/beam
 #   podman build -f Containerfile.ubi -t beam-ubi:latest .
 #
 # Run:
@@ -18,7 +18,7 @@
 #
 
 # Compare size:
-#   podman images | grep -E 'beam-ubi|ubermetroid/beam'
+#   podman images | grep -E 'beam-ubi|etecoons/beam'
 # =============================================================================
 
 # ---------- build: compile backend + WASM frontend ----------

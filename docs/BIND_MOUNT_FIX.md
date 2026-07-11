@@ -137,7 +137,7 @@ npm test -- test/path-validation.test.js
 ```yaml
 services:
   beam:
-    image: ubermetroid/beam:latest
+    image: etecoons/beam:latest
     ports:
       - 3000:3000
     volumes:
@@ -151,7 +151,7 @@ services:
 ```yaml
 services:
   beam:
-    image: ubermetroid/beam:latest
+    image: etecoons/beam:latest
     ports:
       - 3000:3000
     volumes:

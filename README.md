@@ -36,12 +36,12 @@ Images are **UBI9-minimal** based (Red Hat Universal Base Image). Tags:
 
 ```bash
 # Pull examples
-podman pull docker.io/ubermetroid/beam:latest
-podman pull docker.io/ubermetroid/beam:ubi
-podman pull docker.io/ubermetroid/beam:3.0.21
+podman pull docker.io/etecoons/beam:latest
+podman pull docker.io/etecoons/beam:ubi
+podman pull docker.io/etecoons/beam:3.0.21
 ```
 
-Hub: [https://hub.docker.com/r/ubermetroid/beam](https://hub.docker.com/r/ubermetroid/beam)
+Hub: [https://hub.docker.com/r/etecoons/beam](https://hub.docker.com/r/etecoons/beam)
 
 ### Docker Compose
 Create a `docker-compose.yml` file with the following service definition:
@@ -49,7 +49,7 @@ Create a `docker-compose.yml` file with the following service definition:
 ```yaml
 services:
   beam:
-    image: ubermetroid/beam:latest
+    image: etecoons/beam:latest
     container_name: beam
     restart: unless-stopped
     ports:
@@ -81,15 +81,15 @@ Requires [Podman](https://podman.io/) (or Docker) and network access to pull bas
 ```bash
 # From the repository root
 podman build --format docker -f Containerfile.ubi \
-  -t docker.io/ubermetroid/beam:3.0.21 \
-  -t docker.io/ubermetroid/beam:latest \
-  -t docker.io/ubermetroid/beam:ubi \
+  -t docker.io/etecoons/beam:3.0.21 \
+  -t docker.io/etecoons/beam:latest \
+  -t docker.io/etecoons/beam:ubi \
   .
 
 # Optional: push all three tags
-podman push docker.io/ubermetroid/beam:3.0.21
-podman push docker.io/ubermetroid/beam:latest
-podman push docker.io/ubermetroid/beam:ubi
+podman push docker.io/etecoons/beam:3.0.21
+podman push docker.io/etecoons/beam:latest
+podman push docker.io/etecoons/beam:ubi
 ```
 
 ---
@@ -147,4 +147,4 @@ cd backend && cargo run
 ---
 
 ## 📄 License
-Licensed under the [Apache License, Version 2.0](LICENSE). Copyright 2026 UberMetroid.
+Licensed under the [Apache License, Version 2.0](LICENSE). Copyright 2026 etecoons.
