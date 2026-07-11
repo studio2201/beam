@@ -1,6 +1,6 @@
 services:
   beam:
-    image: etecoons/beam:latest
+    image: ghcr.io/etecoons/beam:latest
     container_name: beam
     restart: unless-stopped
     ports:
