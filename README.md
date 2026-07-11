@@ -42,12 +42,12 @@ Images are **UBI9-minimal** based (Red Hat Universal Base Image). Tags:
 
 ```bash
 # Pull examples
-podman pull docker.io/ghcr.io/etecoons/beam:latest
-podman pull docker.io/ghcr.io/etecoons/beam:ubi
-podman pull docker.io/ghcr.io/etecoons/beam:3.0.21
+podman pull ghcr.io/etecoons/beam:latest
+podman pull ghcr.io/etecoons/beam:ubi
+podman pull ghcr.io/etecoons/beam:3.0.21
 ```
 
-Hub: [https://hub.docker.com/r/ghcr.io/etecoons/beam](https://hub.docker.com/r/ghcr.io/etecoons/beam)
+Hub: [https://github.com/etecoons/beam/pkgs/container/beam](https://github.com/etecoons/beam/pkgs/container/beam)
 
 ### Docker Compose
 Create a `docker-compose.yml` file with the following service definition:
@@ -87,15 +87,15 @@ Requires [Podman](https://podman.io/) (or Docker) and network access to pull bas
 ```bash
 # From the repository root
 podman build --format docker -f Containerfile.ubi \
- -t docker.io/ghcr.io/etecoons/beam:3.0.21 \
- -t docker.io/ghcr.io/etecoons/beam:latest \
- -t docker.io/ghcr.io/etecoons/beam:ubi \
+ -t ghcr.io/etecoons/beam:3.0.21 \
+ -t ghcr.io/etecoons/beam:latest \
+ -t ghcr.io/etecoons/beam:ubi \
  .
 
 # Optional: push all three tags
-podman push docker.io/ghcr.io/etecoons/beam:3.0.21
-podman push docker.io/ghcr.io/etecoons/beam:latest
-podman push docker.io/ghcr.io/etecoons/beam:ubi
+podman push ghcr.io/etecoons/beam:3.0.21
+podman push ghcr.io/etecoons/beam:latest
+podman push ghcr.io/etecoons/beam:ubi
 ```
 
 ---
