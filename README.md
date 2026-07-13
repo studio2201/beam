@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# Beam
+# <img src="assets/icon.png" width="32" height="32" valign="middle"> Beam
 
 [![CI](https://github.com/etecoons/beam/actions/workflows/ci.yml/badge.svg)](https://github.com/etecoons/beam/actions/workflows/ci.yml)
 
