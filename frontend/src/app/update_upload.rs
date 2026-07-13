@@ -3,7 +3,7 @@ use yew::prelude::*;
 use crate::app::App;
 use crate::app::upload_task::perform_file_upload;
 use crate::types::{Msg, UploadProgress};
-use crate::utils::{generate_batch_id, get_file_path};
+use crate::client_helpers::{generate_batch_id, get_file_path};
 
 impl App {
     pub fn update_upload(&mut self, ctx: &Context<Self>, msg: Msg) -> bool {

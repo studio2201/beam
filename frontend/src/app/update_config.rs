@@ -4,7 +4,7 @@ use yew::prelude::Context;
 
 use crate::app::App;
 use crate::types::Msg;
-use crate::utils::{save_theme, set_theme_attribute};
+use crate::client_helpers::{save_theme, set_theme_attribute};
 
 impl App {
     pub fn update_config(&mut self, ctx: &Context<Self>, msg: Msg) -> bool {

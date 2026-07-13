@@ -4,7 +4,7 @@ use yew::prelude::*;
 use crate::app::App;
 use crate::js_api::get_files_from_data_transfer;
 use crate::types::Msg;
-use crate::utils::{format_file_size, get_file_path};
+use crate::client_helpers::{format_file_size, get_file_path};
 
 impl App {
     pub fn render_uploader(&self, ctx: &Context<Self>) -> Html {

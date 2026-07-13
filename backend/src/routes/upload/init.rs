@@ -38,7 +38,7 @@ pub async fn init_upload(
     Json(payload): Json<InitUploadPayload>,
 ) -> Response {
     if let Err((status, err_json)) =
-        super::utils::validate_upload(&config, &payload.filename, payload.file_size)
+        super::chunk_validation::validate_upload(&config, &payload.filename, payload.file_size)
     {
         return (status, Json(err_json)).into_response();
     }
@@ -57,7 +57,7 @@ pub async fn init_upload(
             }
             bid.to_string()
         }
-        None => super::utils::generate_batch_id(),
+        None => super::chunk_validation::generate_batch_id(),
     };
 
     state
@@ -71,7 +71,7 @@ pub async fn init_upload(
         .to_string_lossy()
         .replace('\\', "/");
 
-    if let Err((status, err_json)) = super::utils::validate_extension(&config, &safe_filename) {
+    if let Err((status, err_json)) = super::chunk_validation::validate_extension(&config, &safe_filename) {
         return (status, Json(err_json)).into_response();
     }
 
@@ -93,7 +93,7 @@ pub async fn init_upload(
     let path_parts: Vec<&str> = safe_filename.split('/').filter(|s| !s.is_empty()).collect();
     if path_parts.len() > 1 {
         final_file_path =
-            super::utils::get_remapped_folder_path(&config, &state, &path_parts, &batch_id);
+            super::chunk_validation::get_remapped_folder_path(&config, &state, &path_parts, &batch_id);
         if !crate::utils::is_path_within_upload_dir(&final_file_path, &config.upload_dir, false) {
             return (
                 StatusCode::FORBIDDEN,
@@ -105,7 +105,7 @@ pub async fn init_upload(
         let _ = fs::create_dir_all(&config.upload_dir);
     }
 
-    final_file_path = super::utils::get_unique_filename(&final_file_path, &config.upload_dir);
+    final_file_path = super::chunk_validation::get_unique_filename(&final_file_path, &config.upload_dir);
 
     if !crate::utils::is_path_within_upload_dir(&final_file_path, &config.upload_dir, false) {
         return (

@@ -18,7 +18,7 @@ mod components;
 mod i18n;
 mod js_api;
 mod types;
-mod utils;
+mod client_helpers;
 
 use app::App;
 

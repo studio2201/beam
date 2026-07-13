@@ -1,6 +1,6 @@
 use crate::api::{cancel_upload, init_upload, upload_chunk};
 use crate::types::Msg;
-use crate::utils::get_file_path;
+use crate::client_helpers::get_file_path;
 
 pub async fn perform_file_upload(
     file: web_sys::File,

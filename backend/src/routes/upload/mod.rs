@@ -2,7 +2,7 @@ mod cancel;
 mod chunk;
 mod init;
 mod metadata;
-mod utils;
+mod chunk_validation;
 
 use axum::{Router, routing::post};
 use std::collections::HashMap;

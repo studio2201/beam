@@ -112,7 +112,7 @@ fn render_file_items(
                                             e.stop_propagation();
                                             let window = web_sys::window().unwrap();
                                             let origin = window.location().origin().unwrap_or_default();
-                                            let encoded_path = crate::utils::encode_path(&p);
+                                            let encoded_path = crate::client_helpers::encode_path(&p);
                                             let full_url = format!("{}/api/files/download/{}", origin, encoded_path);
 
                                             if crate::js_api::copy_text_to_clipboard(&full_url) {
