@@ -6,6 +6,8 @@
 
 # Beam
 
+[![CI](https://github.com/etecoon/beam/actions/workflows/ci.yml/badge.svg)](https://github.com/etecoon/beam/actions/workflows/ci.yml)
+
 High-performance, secure self-hosted file sharing web application in Rust.
 
 ## Quick Start
