@@ -1,5 +1,5 @@
-use crate::types::{FileListResponse, FrontendConfig};
 use crate::client_helpers::encode_path;
+use crate::types::{FileListResponse, FrontendConfig};
 
 pub async fn fetch_config() -> Result<FrontendConfig, String> {
     let res = gloo_net::http::Request::get("/api/auth/config")

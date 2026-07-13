@@ -14,11 +14,11 @@
 
 mod api;
 mod app;
+mod client_helpers;
 mod components;
 mod i18n;
 mod js_api;
 mod types;
-mod client_helpers;
 
 use app::App;
 
