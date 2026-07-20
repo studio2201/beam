@@ -67,7 +67,6 @@ pub async fn verify_pin(
 
     // 3. Lockout.
     if is_locked_out(&ip) {
-        let _ = record_attempt(&ip);
         let time_left = get_lockout_time_remaining(&ip);
         let minutes_left = (time_left as f64 / 60.0).ceil() as u64;
         tracing::warn!("Login attempt from locked out IP: {}", ip);

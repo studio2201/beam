@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.19] - 2026-07-19
+
+### Fixed
+- **Lockout Reset**: Fixed a bug where a locked-out IP address logging additional attempts would refresh/extend the 15-minute lockout timer indefinitely.
+
 ## [1.0.18] - 2026-07-19
 
 ### Changed
