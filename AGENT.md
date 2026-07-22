@@ -44,8 +44,8 @@ This repository operates under strict multi-agent governance and first-principle
 6. **No `.unwrap()` or `.expect()` in Production Code**:
    - Strictly forbid the use of `.unwrap()` and `.expect()` outside of test modules (`#[cfg(test)]`). All production error cases must use proper `Result` propagation and pattern matching.
 
-7. **Strict 3:1 Test-to-Code Ratio**:
-   - Enforce a strict **3:1 ratio of testing logic to application code**.
+7. **3:1 Test-to-Code Ratio Goal**:
+   - Pursue a **3:1 test-to-code ratio goal**—not a hard requirement, but a forcing function for defect discovery, regression shielding, and decoupled architecture.
    - Explicitly cover internal helper functions, public logic, and user interfaces concurrently as code is built.
 
 8. **Continuous State Tracking**:
