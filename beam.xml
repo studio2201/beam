@@ -9,18 +9,18 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/studio2201/beam/issues</Support>
   <Project>https://github.com/studio2201/beam</Project>
-  <Overview>High-performance, secure self-hosted file sharing web application built in Rust with an atomic retro pinup interface.</Overview>
+  <Overview>High-performance, secure self-hosted file sharing web application built in Rust.</Overview>
   <Category>Tools: MediaServer:Other Network:Web Storage:</Category>
   <WebUI>http://[IP]:[PORT:4401]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/studio2201/unraid-templates/main/templates/beam.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/studio2201/beam/main/assets/beam-icon.png</Icon>
+  <Icon>https://raw.githubusercontent.com/studio2201/unraid-templates/main/icons/beam.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
   <DateInstalled/>
   <DonateText/>
   <DonateLink/>
-  <Description>High-performance, secure self-hosted file sharing web application built in Rust with an atomic retro pinup interface.</Description>
+  <Description>High-performance, secure self-hosted file sharing web application built in Rust.</Description>
   <Networking>
     <Mode>bridge</Mode>
     <Publish>
@@ -46,12 +46,11 @@
     </Variable>
     <Variable>
       <Value>/config</Value>
-      <Name>UPLOAD_DIR</Name>
+      <Name>DATA_DIR</Name>
       <Mode/>
     </Variable>
   </Environment>
   <Labels/>
   <Config Name="Web UI Port" Target="4401" Default="4401" Mode="tcp" Description="HTTP Web Interface Port" Type="Port" Display="always" Required="true" Mask="false">4401</Config>
-  <Config Name="App Storage Directory" Target="/config" Default="/mnt/user/appdata/beam" Mode="rw" Description="Persistent file uploads and database directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/beam</Config>
-  <Config Name="Security PIN" Target="BEAM_PIN" Default="" Mode="" Description="Optional PIN required for client upload authentication" Type="Variable" Display="always" Required="false" Mask="true"/>
+  <Config Name="App Storage Directory" Target="/config" Default="/mnt/user/appdata/beam" Mode="rw" Description="Persistent data and configuration directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/beam</Config>
 </Container>
