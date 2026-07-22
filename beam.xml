@@ -13,7 +13,7 @@
   <Category>Network:Web Tools:Utilities Cloud:Storage</Category>
   <WebUI>http://[IP]:[PORT:4401]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/studio2201/unraid-templates/master/templates/beam.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/studio2201/unraid-templates/master/icons/beam.png</Icon>
+  <Icon>https://raw.githubusercontent.com/studio2201/.github/master/profile/assets/beam.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
