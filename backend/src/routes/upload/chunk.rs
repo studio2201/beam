@@ -14,6 +14,10 @@ use crate::routes::auth::RequirePin;
 use crate::routes::upload::UploadState;
 use crate::routes::upload::metadata::{delete_upload_metadata, read_upload_metadata};
 
+#[tracing::instrument(
+    skip(config, state, _auth, headers, body),
+    fields(upload_id = %upload_id, chunk_size = body.len())
+)]
 pub async fn upload_chunk(
     State(config): State<Arc<AppConfig>>,
     State(state): State<Arc<UploadState>>,

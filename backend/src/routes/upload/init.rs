@@ -30,6 +30,10 @@ pub struct InitUploadResponse {
     pub upload_id: String,
 }
 
+#[tracing::instrument(
+    skip(config, state, _auth, headers, payload),
+    fields(filename = %payload.filename, file_size = payload.file_size)
+)]
 pub async fn init_upload(
     State(config): State<Arc<AppConfig>>,
     State(state): State<Arc<UploadState>>,
