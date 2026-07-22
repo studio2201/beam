@@ -157,3 +157,71 @@ fn test_is_path_within_upload_dir_require_exists_canonicalizes() {
     ));
     std::fs::remove_dir_all(&tmp).ok();
 }
+
+#[test]
+fn test_property_sanitize_path_never_panics() {
+    let long_string = "a/".repeat(500);
+    let inputs = vec![
+        "",
+        "   ",
+        "\0",
+        "\x00\x01\x02",
+        "../../../../etc/passwd",
+        "C:\\Windows\\System32\\cmd.exe",
+        "CON.txt",
+        "AUX",
+        "   ..   ",
+        "🔥🦀🎉",
+        long_string.as_str(),
+        "../../..//..//",
+        "hello\0world",
+    ];
+
+    for input in inputs {
+        let clean = utils::sanitize_filename_safe(input);
+        assert!(!clean.contains('\0'));
+        let path_clean = utils::sanitize_path_preserve_dirs_safe(input);
+        assert!(!path_clean.contains('\0'));
+    }
+}
+
+#[test]
+fn test_property_is_path_within_upload_dir_never_panics() {
+    let tmp = std::env::temp_dir();
+    let malformed_paths = vec![
+        "",
+        "/",
+        "relative/path",
+        "../../outside",
+        "/etc/passwd",
+        "\0",
+        "C:\\Windows",
+    ];
+
+    for path_str in malformed_paths {
+        let p = Path::new(path_str);
+        let _ = utils::is_path_within_upload_dir(p, &tmp, false);
+        let _ = utils::is_path_within_upload_dir(p, &tmp, true);
+    }
+}
+
+#[test]
+fn test_property_format_file_size_never_panics() {
+    let sizes = vec![0, 1, 1024, 1048576, u64::MAX];
+    let units = vec![
+        None,
+        Some("B"),
+        Some("KB"),
+        Some("MB"),
+        Some("GB"),
+        Some("TB"),
+        Some("INVALID"),
+    ];
+
+    for size in sizes {
+        for unit in &units {
+            let res = utils::format_file_size(size, *unit);
+            assert!(!res.is_empty());
+        }
+    }
+}
