@@ -1,27 +1,22 @@
 <p align="center">
   <a href="https://github.com/studio2201/beam">
-    <img src="assets/beam-header.jpg" alt="BEAM Banner" width="100%">
+    <img src="assets/beam-header.jpg" alt="studio2201 banner" width="100%">
   </a>
 </p>
 
 ```
-  ██████╗ ███████╗  █████╗  ███╗   ███╗
-  ██╔══██╗██╔════╝ ██╔══██╗ ████╗ ████║
-  ██████╔╝█████╗   ███████║ ██╔████╔██║
-  ██╔══██╗██╔══╝   ██╔══██║ ██║╚██╔╝██║
-  ██████╔╝███████╗ ██║  ██║ ██║ ╚═╝ ██║
-  ╚═════╝ ╚══════╝ ╚═╝  ╚═╝ ╚═╝     ╚═╝
-  HIGH-PERFORMANCE SECURE FILE SHARING ENGINE
++-----------------------------------------------------------------+
+|                              BEAM                               |
+|        HIGH-PERFORMANCE SECURE FILE SHARING WEB SERVICE         |
++-----------------------------------------------------------------+
 ```
 
-<h1 align="center">Beam</h1>
+<h1 align="center">
+  <img src="assets/beam-icon.png" width="48" height="48" valign="middle"> Beam
+</h1>
 
 <p align="center">
-  <b>High-performance, secure self-hosted file sharing web application in Rust.</b>
-</p>
-
-<p align="center">
-  <img src="assets/beam-mascot.jpg" alt="Beam Mascot" width="220" align="right">
+  <b>High-performance, secure self-hosted file sharing web application written in Rust.</b>
 </p>
 
 ---
