@@ -76,11 +76,31 @@ mod tests {
     }
 
     #[test]
+    fn forbidden_status() {
+        let r = ServerError::Forbidden.into_response();
+        assert_eq!(r.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[test]
+    fn bad_request_status() {
+        let r = ServerError::BadRequest("invalid query parameter".into()).into_response();
+        assert_eq!(r.status(), StatusCode::BAD_REQUEST);
+    }
+
+    #[test]
+    fn from_conversions() {
+        let io_err = std::io::Error::new(std::io::ErrorKind::PermissionDenied, "denied");
+        let server_err: ServerError = io_err.into();
+        assert_eq!(server_err.into_response().status(), StatusCode::INTERNAL_SERVER_ERROR);
+
+        let anyhow_err = anyhow::anyhow!("something went wrong");
+        let server_err2: ServerError = anyhow_err.into();
+        assert_eq!(server_err2.into_response().status(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    #[test]
     fn internal_error_does_not_leak_details() {
         let r = ServerError::Internal("database password = hunter2".into()).into_response();
         assert_eq!(r.status(), StatusCode::INTERNAL_SERVER_ERROR);
-        // Body should be a fixed string, not the inner message.
-        // We can't easily await the body in a sync test, so we just check
-        // the status code and trust the static "internal error" string.
     }
 }
