@@ -110,15 +110,16 @@ fn render_file_items(
                                         let error_msg = copied_error.clone();
                                         Callback::from(move |e: MouseEvent| {
                                             e.stop_propagation();
-                                            let window = web_sys::window().unwrap();
-                                            let origin = window.location().origin().unwrap_or_default();
-                                            let encoded_path = crate::client_helpers::encode_path(&p);
-                                            let full_url = format!("{}/api/files/download/{}", origin, encoded_path);
+                                            if let Some(window) = web_sys::window() {
+                                                let origin = window.location().origin().unwrap_or_default();
+                                                let encoded_path = crate::client_helpers::encode_path(&p);
+                                                let full_url = format!("{}/api/files/download/{}", origin, encoded_path);
 
-                                            if crate::js_api::copy_text_to_clipboard(&full_url) {
-                                                l.send_message(Msg::AddToast(success_msg.clone(), "success".to_string()));
-                                            } else {
-                                                l.send_message(Msg::AddToast(error_msg.clone(), "error".to_string()));
+                                                if crate::js_api::copy_text_to_clipboard(&full_url) {
+                                                    l.send_message(Msg::AddToast(success_msg.clone(), "success".to_string()));
+                                                } else {
+                                                    l.send_message(Msg::AddToast(error_msg.clone(), "error".to_string()));
+                                                }
                                             }
                                         })
                                     }>

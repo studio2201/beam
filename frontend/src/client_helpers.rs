@@ -28,10 +28,13 @@ pub fn save_theme(theme: &str) {
 }
 
 pub fn set_theme_attribute(theme: &str) {
-    let document = web_sys::window().unwrap().document().unwrap();
-    let html = document.document_element().unwrap();
-    let _ = html.set_attribute("data-theme", theme);
-    let _ = html.set_attribute("class", theme);
+    if let Some(window) = web_sys::window()
+        && let Some(document) = window.document()
+        && let Some(html) = document.document_element()
+    {
+        let _ = html.set_attribute("data-theme", theme);
+        let _ = html.set_attribute("class", theme);
+    }
 }
 
 pub fn format_file_size(bytes: u64) -> String {
@@ -41,13 +44,16 @@ pub fn format_file_size(bytes: u64) -> String {
     let k = 1024.0;
     let sizes = ["Bytes", "KB", "MB", "GB", "TB"];
     let i = (bytes as f64).log(k).floor() as usize;
+    let i = i.min(sizes.len() - 1);
     let val = bytes as f64 / k.powi(i as i32);
     format!("{:.2} {}", val, sizes[i])
 }
 
 pub fn generate_batch_id() -> String {
-    let window = web_sys::window().unwrap();
-    let now = window.performance().unwrap().now() as u64;
+    let now = web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now() as u64)
+        .unwrap_or(0);
     let random: u32 = js_sys::Math::random().to_bits() as u32;
     format!("{}-{:x}", now, random)
 }

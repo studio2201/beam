@@ -105,7 +105,10 @@ pub fn get_remapped_folder_path(
     let mapping_key = format!("{}-{}", original_folder_name, batch_id);
 
     let new_folder_name = {
-        let mut mappings = state.folder_mappings.lock().unwrap();
+        let mut mappings = state
+            .folder_mappings
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         if let Some(mapped) = mappings.get(&mapping_key) {
             mapped.clone()
         } else {

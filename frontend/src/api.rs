@@ -105,8 +105,9 @@ pub async fn rename_file_api(file_path: &str, new_name: &str) -> Result<(), Stri
 pub fn download_file(file_path: &str) {
     let encoded_path = encode_path(file_path);
     let url = format!("/api/files/download/{}", encoded_path);
-    let window = web_sys::window().unwrap();
-    let _ = window.open_with_url_and_target(&url, "_blank");
+    if let Some(window) = web_sys::window() {
+        let _ = window.open_with_url_and_target(&url, "_blank");
+    }
 }
 
 pub async fn init_upload(filename: &str, file_size: u64, batch_id: &str) -> Result<String, String> {

@@ -36,9 +36,10 @@ pub async fn perform_file_upload(
     let mut failed = false;
 
     let mut last_uploaded_bytes = 0u64;
-    let window_obj = web_sys::window().unwrap();
-    let perf = window_obj.performance().unwrap();
-    let mut last_upload_time = perf.now();
+    let mut last_upload_time = web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now())
+        .unwrap_or(0.0);
 
     if size == 0 {
         link.send_message(Msg::UploadProgressUpdate(
@@ -111,8 +112,10 @@ pub async fn perform_file_upload(
                 Ok(_progress) => {
                     chunk_success = true;
 
-                    // Calculate rates
-                    let current_time = perf.now();
+                    let current_time = web_sys::window()
+                        .and_then(|w| w.performance())
+                        .map(|p| p.now())
+                        .unwrap_or(0.0);
                     let time_diff = (current_time - last_upload_time) / 1000.0; // convert to secs
                     let bytes_diff = end - last_uploaded_bytes;
 

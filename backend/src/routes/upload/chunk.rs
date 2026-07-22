@@ -36,7 +36,10 @@ pub async fn upload_chunk(
     }
 
     let cached_metadata = {
-        let active = state.active_uploads.lock().unwrap();
+        let active = state
+            .active_uploads
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         active.get(&upload_id).cloned()
     };
 
@@ -44,7 +47,10 @@ pub async fn upload_chunk(
         Some(m) => m,
         None => match read_upload_metadata(&config.upload_dir, &upload_id).await {
             Some(m) => {
-                let mut active = state.active_uploads.lock().unwrap();
+                let mut active = state
+                    .active_uploads
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
                 active.insert(upload_id.clone(), m.clone());
                 m
             }
@@ -71,7 +77,7 @@ pub async fn upload_chunk(
         state
             .batch_activity
             .lock()
-            .unwrap()
+            .unwrap_or_else(|e| e.into_inner())
             .insert(metadata.batch_id.clone(), std::time::Instant::now());
     }
 
@@ -82,8 +88,16 @@ pub async fn upload_chunk(
             let _ = tokio::fs::rename(partial_path, final_path).await;
         }
         delete_upload_metadata(&config.upload_dir, &upload_id).await;
-        state.active_uploads.lock().unwrap().remove(&upload_id);
-        state.file_handles.lock().unwrap().remove(&upload_id);
+        state
+            .active_uploads
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .remove(&upload_id);
+        state
+            .file_handles
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .remove(&upload_id);
         return Json(json!({ "bytesReceived": metadata.file_size, "progress": 100 }))
             .into_response();
     }
@@ -110,7 +124,7 @@ pub async fn upload_chunk(
         let partial_path = StdPath::new(&metadata.partial_file_path);
 
         let existing_arc = {
-            let handles = state.file_handles.lock().unwrap();
+            let handles = state.file_handles.lock().unwrap_or_else(|e| e.into_inner());
             handles.get(&upload_id).cloned()
         };
 
@@ -135,7 +149,7 @@ pub async fn upload_chunk(
                     }
                 };
                 let arc = Arc::new(tokio::sync::Mutex::new(file));
-                let mut handles = state.file_handles.lock().unwrap();
+                let mut handles = state.file_handles.lock().unwrap_or_else(|e| e.into_inner());
                 handles.entry(upload_id.clone()).or_insert(arc).clone()
             }
         };
@@ -177,14 +191,17 @@ pub async fn upload_chunk(
 
     metadata.last_activity = chrono::Utc::now().timestamp_millis() as u64;
     {
-        let mut active = state.active_uploads.lock().unwrap();
+        let mut active = state
+            .active_uploads
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         active.insert(upload_id.clone(), metadata.clone());
     }
 
     if metadata.bytes_received >= metadata.file_size {
         // Remove and drop the file handle from state so it closes the file!
         {
-            let mut handles = state.file_handles.lock().unwrap();
+            let mut handles = state.file_handles.lock().unwrap_or_else(|e| e.into_inner());
             handles.remove(&upload_id);
         }
 
@@ -206,7 +223,10 @@ pub async fn upload_chunk(
                 );
                 delete_upload_metadata(&config.upload_dir, &upload_id).await;
                 {
-                    let mut active = state.active_uploads.lock().unwrap();
+                    let mut active = state
+                        .active_uploads
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner());
                     active.remove(&upload_id);
                 }
             }
@@ -218,7 +238,10 @@ pub async fn upload_chunk(
                     );
                     delete_upload_metadata(&config.upload_dir, &upload_id).await;
                     {
-                        let mut active = state.active_uploads.lock().unwrap();
+                        let mut active = state
+                            .active_uploads
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner());
                         active.remove(&upload_id);
                     }
                 } else {

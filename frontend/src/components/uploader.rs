@@ -30,36 +30,38 @@ impl App {
             e.prevent_default();
             e.stop_propagation();
 
-            let data_transfer = e.data_transfer().unwrap();
-            let link = link_c.clone();
+            if let Some(data_transfer) = e.data_transfer() {
+                let link = link_c.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
-                match get_files_from_data_transfer(&data_transfer).await {
-                    Ok(arr) => {
-                        let mut files = Vec::new();
-                        for i in 0..arr.length() {
-                            let val = arr.get(i);
-                            let file: web_sys::File = val.unchecked_into();
-                            files.push(file);
+                wasm_bindgen_futures::spawn_local(async move {
+                    match get_files_from_data_transfer(&data_transfer).await {
+                        Ok(arr) => {
+                            let mut files = Vec::new();
+                            for i in 0..arr.length() {
+                                let val = arr.get(i);
+                                let file: web_sys::File = val.unchecked_into();
+                                files.push(file);
+                            }
+                            link.send_message(Msg::DropProcessed(Ok(files)));
                         }
-                        link.send_message(Msg::DropProcessed(Ok(files)));
+                        Err(err) => {
+                            link.send_message(Msg::DropProcessed(Err(format!("{:?}", err))));
+                        }
                     }
-                    Err(err) => {
-                        link.send_message(Msg::DropProcessed(Err(format!("{:?}", err))));
-                    }
-                }
-            });
+                });
+            }
 
             Msg::DragOver(false)
         });
 
         let on_file_input_change = ctx.link().callback(|e: Event| {
             let input: web_sys::HtmlInputElement = e.target_unchecked_into();
-            let file_list = input.files().unwrap();
             let mut files = Vec::new();
-            for i in 0..file_list.length() {
-                if let Some(file) = file_list.item(i) {
-                    files.push(file);
+            if let Some(file_list) = input.files() {
+                for i in 0..file_list.length() {
+                    if let Some(file) = file_list.item(i) {
+                        files.push(file);
+                    }
                 }
             }
             Msg::FilesSelected(files)
@@ -67,11 +69,12 @@ impl App {
 
         let on_folder_input_change = ctx.link().callback(|e: Event| {
             let input: web_sys::HtmlInputElement = e.target_unchecked_into();
-            let file_list = input.files().unwrap();
             let mut files = Vec::new();
-            for i in 0..file_list.length() {
-                if let Some(file) = file_list.item(i) {
-                    files.push(file);
+            if let Some(file_list) = input.files() {
+                for i in 0..file_list.length() {
+                    if let Some(file) = file_list.item(i) {
+                        files.push(file);
+                    }
                 }
             }
             Msg::FoldersSelected(files)

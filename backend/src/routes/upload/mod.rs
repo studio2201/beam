@@ -142,7 +142,10 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
 
             let mut expired_batches = Vec::new();
             {
-                let activity = state.batch_activity.lock().unwrap();
+                let activity = state
+                    .batch_activity
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
                 for (batch_id, last_activity) in activity.iter() {
                     if now.duration_since(*last_activity) >= timeout {
                         expired_batches.push(batch_id.clone());
@@ -155,8 +158,14 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
                     "Cleaning up {} inactive batch sessions",
                     expired_batches.len()
                 );
-                let mut activity = state.batch_activity.lock().unwrap();
-                let mut mappings = state.folder_mappings.lock().unwrap();
+                let mut activity = state
+                    .batch_activity
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
+                let mut mappings = state
+                    .folder_mappings
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
 
                 for batch_id in expired_batches {
                     activity.remove(&batch_id);
@@ -167,7 +176,10 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
             // Cleanup stale cached in-memory upload metadata
             let mut expired_uploads = Vec::new();
             {
-                let active = state.active_uploads.lock().unwrap();
+                let active = state
+                    .active_uploads
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
                 for (upload_id, meta) in active.iter() {
                     let last_activity_time = std::time::UNIX_EPOCH
                         + std::time::Duration::from_millis(meta.last_activity);
@@ -184,8 +196,11 @@ pub fn start_batch_cleanup(config: Arc<crate::config::AppConfig>, state: Arc<Upl
                     "Cleaning up {} expired cached uploads",
                     expired_uploads.len()
                 );
-                let mut active = state.active_uploads.lock().unwrap();
-                let mut handles = state.file_handles.lock().unwrap();
+                let mut active = state
+                    .active_uploads
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
+                let mut handles = state.file_handles.lock().unwrap_or_else(|e| e.into_inner());
                 for upload_id in expired_uploads {
                     active.remove(&upload_id);
                     handles.remove(&upload_id);

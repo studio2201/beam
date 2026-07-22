@@ -67,7 +67,7 @@ pub async fn init_upload(
     state
         .batch_activity
         .lock()
-        .unwrap()
+        .unwrap_or_else(|e| e.into_inner())
         .insert(batch_id.clone(), std::time::Instant::now());
 
     let sanitized = crate::utils::sanitize_path_preserve_dirs_safe(&payload.filename);
@@ -165,7 +165,10 @@ pub async fn init_upload(
     }
 
     {
-        let mut active = state.active_uploads.lock().unwrap();
+        let mut active = state
+            .active_uploads
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         active.insert(upload_id.clone(), metadata.clone());
     }
 
@@ -185,7 +188,10 @@ pub async fn init_upload(
             );
             delete_upload_metadata(&config.upload_dir, &upload_id).await;
             {
-                let mut active = state.active_uploads.lock().unwrap();
+                let mut active = state
+                    .active_uploads
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
                 active.remove(&upload_id);
             }
             return (
@@ -202,7 +208,10 @@ pub async fn init_upload(
         );
         delete_upload_metadata(&config.upload_dir, &upload_id).await;
         {
-            let mut active = state.active_uploads.lock().unwrap();
+            let mut active = state
+                .active_uploads
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
             active.remove(&upload_id);
         }
     }

@@ -42,22 +42,25 @@ impl App {
 
             Msg::DeleteFile(path) => {
                 let name = path.split('/').next_back().unwrap_or(&path).to_string();
-                let window = web_sys::window().unwrap();
-                let translations = crate::i18n::get_translations(self.language);
-                let confirm_msg = format!(
-                    "{}{}{}",
-                    translations.delete_confirm_prefix, name, translations.delete_confirm_suffix
-                );
+                if let Some(window) = web_sys::window() {
+                    let translations = crate::i18n::get_translations(self.language);
+                    let confirm_msg = format!(
+                        "{}{}{}",
+                        translations.delete_confirm_prefix,
+                        name,
+                        translations.delete_confirm_suffix
+                    );
 
-                if window.confirm_with_message(&confirm_msg).unwrap_or(false) {
-                    let link = ctx.link().clone();
-                    let path_c = path.clone();
-                    wasm_bindgen_futures::spawn_local(async move {
-                        match delete_file_api(&path_c).await {
-                            Ok(_) => link.send_message(Msg::DeleteResult(Ok(path_c))),
-                            Err(e) => link.send_message(Msg::DeleteResult(Err(e))),
-                        }
-                    });
+                    if window.confirm_with_message(&confirm_msg).unwrap_or(false) {
+                        let link = ctx.link().clone();
+                        let path_c = path.clone();
+                        wasm_bindgen_futures::spawn_local(async move {
+                            match delete_file_api(&path_c).await {
+                                Ok(_) => link.send_message(Msg::DeleteResult(Ok(path_c))),
+                                Err(e) => link.send_message(Msg::DeleteResult(Err(e))),
+                            }
+                        });
+                    }
                 }
                 false
             }

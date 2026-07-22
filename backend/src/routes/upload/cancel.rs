@@ -22,12 +22,15 @@ pub async fn cancel_upload(
 
     // Remove the file handle first so the file is closed, allowing removal of the partial file on disk
     {
-        let mut handles = state.file_handles.lock().unwrap();
+        let mut handles = state.file_handles.lock().unwrap_or_else(|e| e.into_inner());
         handles.remove(&upload_id);
     }
 
     let metadata = {
-        let active = state.active_uploads.lock().unwrap();
+        let active = state
+            .active_uploads
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         active.get(&upload_id).cloned()
     };
 
@@ -44,7 +47,10 @@ pub async fn cancel_upload(
         }
         super::metadata::delete_upload_metadata(&config.upload_dir, &upload_id).await;
         {
-            let mut active = state.active_uploads.lock().unwrap();
+            let mut active = state
+                .active_uploads
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
             active.remove(&upload_id);
         }
         tracing::info!(
