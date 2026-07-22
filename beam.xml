@@ -12,8 +12,8 @@
   <Overview>High-performance, secure self-hosted file sharing web application built in Rust.</Overview>
   <Category>Network:Web Tools:Utilities Cloud:Storage</Category>
   <WebUI>http://[IP]:[PORT:4401]/</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/studio2201/unraid-templates/main/templates/beam.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/studio2201/unraid-templates/main/icons/beam.png</Icon>
+  <TemplateURL>https://raw.githubusercontent.com/studio2201/unraid-templates/master/templates/beam.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/studio2201/unraid-templates/master/icons/beam.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
