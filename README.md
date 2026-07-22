@@ -4,13 +4,6 @@
   </a>
 </p>
 
-```
-+-----------------------------------------------------------------+
-|                              BEAM                               |
-|        HIGH-PERFORMANCE SECURE FILE SHARING WEB SERVICE         |
-+-----------------------------------------------------------------+
-```
-
 <h1 align="center">
   <img src="assets/beam-icon.png" width="48" height="48" valign="middle"> Beam
 </h1>
