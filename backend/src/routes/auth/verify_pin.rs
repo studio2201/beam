@@ -10,7 +10,7 @@ use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use std::net::SocketAddr;
 
 use crate::config::AppConfig;
-use crate::routes::auth::{VerifyPinPayload, VerifyPinResponse, generate_session_id};
+use crate::routes::auth::{VerifyPinPayload, VerifyPinResponse};
 use crate::security::{
     get_client_ip, get_lockout_time_remaining, get_max_attempts, is_locked_out, record_attempt,
     reset_attempts, safe_compare,
@@ -90,13 +90,12 @@ pub async fn verify_pin(
     // 4. Compare PIN.
     if safe_compare(pin_str, config_pin) {
         reset_attempts(&ip);
-        let is_secure = headers
-            .get("x-forwarded-proto")
-            .and_then(|v| v.to_str().ok())
-            .map(|v| v.eq_ignore_ascii_case("https"))
-            .unwrap_or_else(|| config.server.base_url.starts_with("https"));
+        let is_secure = shared_backend::cookie_auth::cookie_should_be_secure(
+            &headers,
+            &config.server.base_url,
+        );
 
-        let session_id = generate_session_id();
+        let session_id = shared_backend::session_id::generate_session_id();
         state
             .active_sessions
             .write()

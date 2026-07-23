@@ -78,27 +78,6 @@ pub fn router() -> Router<crate::AppState> {
         .route("/config", get(pin_required::get_config))
 }
 
-pub fn generate_session_id() -> String {
-    use std::fs::File;
-    use std::io::Read;
-    let file = File::open("/dev/urandom").ok();
-    let mut bytes = [0u8; 16];
-    if let Some(mut f) = file
-        && f.read_exact(&mut bytes).is_ok()
-    {
-        return bytes.iter().map(|b| format!("{:02x}", b)).collect();
-    }
-    let random_val = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_nanos())
-        .unwrap_or(0);
-    use sha2::{Digest, Sha256};
-    let mut hasher = Sha256::new();
-    hasher.update(random_val.to_string().as_bytes());
-    let result = hasher.finalize();
-    result.iter().map(|b| format!("{:02x}", b)).collect()
-}
-
 pub async fn rate_limit_middleware(
     State(state): State<crate::AppState>,
     req: axum::extract::Request,
