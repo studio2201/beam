@@ -94,6 +94,10 @@ Distributed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
 
 ---
 
+### Project Banner Showcase
+
+Official **Beam** project banner showcasing high-performance P2P file sharing raycasting and secure transfer visual architecture.
+
 <p align="center">
   <a href="https://github.com/studio2201/beam">
     <img src="assets/beam-header.jpg" alt="studio2201 banner" width="100%">
