@@ -44,7 +44,9 @@ async fn main() {
     generate_pwa_manifest(&config);
 
     let app = build_router(config.clone(), app_state);
-    run_server(config.server.port, app).await;
+    if let Err(e) = run_server(config.server.port, app).await {
+        tracing::error!("Server error: {e}");
+    }
 }
 
 /// Ensure upload dir + metadata subdir exist.
@@ -111,12 +113,13 @@ fn build_router(config: Arc<AppConfig>, app_state: AppState) -> Router {
 }
 
 /// Bind and serve with graceful shutdown on SIGINT/SIGTERM.
-async fn run_server(port: u16, app: Router) {
+async fn run_server(port: u16, app: Router) -> Result<(), Box<dyn std::error::Error>> {
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!(target: "bootstrap", "listening on {addr}");
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(addr).await?;
     let svc = app.into_make_service_with_connect_info::<std::net::SocketAddr>();
-    axum::serve(listener, svc).await.unwrap();
+    axum::serve(listener, svc).await?;
+    Ok(())
 }
 
 // `serve_html` lives in `static_files` and is used by `serve_index`. The
