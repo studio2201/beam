@@ -96,8 +96,28 @@ impl AppConfig {
             lockout_time_minutes: parse_or("LOCKOUT_TIME_MINUTES", 15u64),
             cookie_max_age_hours: parse_or("COOKIE_MAX_AGE_HOURS", 24i64),
             shutdown_drain_seconds: parse_or("SHUTDOWN_DRAIN_SECONDS", 5u64),
-
+            upload_dir: std::env::var("UPLOAD_DIR")
+                .or_else(|_| std::env::var("LOCAL_UPLOAD_DIR"))
+                .map(std::path::PathBuf::from)
+                .unwrap_or_else(|_| std::path::PathBuf::from("/app/data/uploads")),
+            max_file_size: parse_or("MAX_FILE_SIZE", 10u64 * 1024 * 1024 * 1024),
+            auto_upload: parse_optout_bool_env("AUTO_UPLOAD", false),
+            show_file_list: parse_optout_bool_env("SHOW_FILE_LIST", true),
+            trust_proxy_local: parse_bool_env("TRUST_PROXY_LOCAL"),
+            trusted_proxy_ips: env::var("TRUSTED_PROXY_IPS")
+                .ok()
+                .map(|s| s.split(',').map(|s| s.trim().to_string()).collect())
+                .filter(|v: &Vec<String>| !v.is_empty()),
+            allowed_extensions: env::var("ALLOWED_EXTENSIONS")
+                .ok()
+                .map(|s| s.split(',').map(|s| s.trim().to_string()).collect())
+                .filter(|v: &Vec<String>| !v.is_empty()),
+            client_max_retries: parse_or("CLIENT_MAX_RETRIES", 3u32),
+            max_storage_limit: env::var("MAX_STORAGE_LIMIT").ok().and_then(|s| s.parse().ok()),
+            retention_period_days: env::var("RETENTION_PERIOD_DAYS").ok().and_then(|s| s.parse().ok()),
+            node_env: env::var("NODE_ENV").unwrap_or_else(|_| "production".to_string()),
         }
+
     }
 
     /// Returns `true` if PIN-based authentication is enabled.

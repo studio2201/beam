@@ -82,7 +82,7 @@ pub fn get_client_ip(
 ) -> String {
     use ipnet::IpNet;
 
-    let socket_ip = shared_backend::server::normalize_ip(addr.ip());
+    let socket_ip = crate::ip::normalize_ip(addr.ip());
 
     if !trust_proxy {
         return socket_ip.to_string();
@@ -130,6 +130,6 @@ pub fn get_client_ip(
 
     trimmed
         .parse::<IpAddr>()
-        .map(shared_backend::server::normalize_ip)
+        .map(crate::ip::normalize_ip)
         .map_or_else(|_| socket_ip.to_string(), |ip| ip.to_string())
 }

@@ -20,11 +20,12 @@ use crate::routes::upload::{UploadState, start_batch_cleanup};
 pub use crate::services::pwa;
 use crate::services::pwa::generate_pwa_manifest;
 use crate::state::AppState;
-use shared_backend::middleware::hsts::{HstsState, hsts_layer};
+use crate::middleware::{{hsts_layer, HstsState}};
 
-use shared_backend::middleware::title::{TitleState, title_injection_layer};
+use crate::middleware::{{title_injection_layer, TitleState}};
 
-use shared_backend::middleware::{cors_layer, security_headers_layer};
+use shared_backend::middleware::security_headers_layer;
+use crate::middleware::cors_layer;
 mod cookie_auth;
 mod session_id;
 
@@ -82,7 +83,7 @@ fn build_router(config: Arc<AppConfig>, app_state: AppState) -> Router {
     // The shared-assets middleware needs a `&ServerConfig` / `Arc<ServerConfig>`.
     // Extract it from the app config so the rest of the file can keep using
     // `Arc<AppConfig>`.
-    let server_config: Arc<crate::config::AppConfig> = Arc::new(config.clone());
+    let server_config: Arc<crate::config::AppConfig> = config.clone();
 
     let api_routes = Router::new()
         .nest("/auth", crate::routes::auth::router())
@@ -93,7 +94,7 @@ fn build_router(config: Arc<AppConfig>, app_state: AppState) -> Router {
             crate::routes::auth::rate_limit_middleware,
         ));
 
-    let cors = cors_layer(&config.server);
+    let cors = cors_layer(&crate::middleware::CorsState(config.clone()));
 
     Router::new()
         .nest("/api", api_routes)
