@@ -19,8 +19,8 @@ serde_json = "1.0"
 gloo-net = "0.7"
 gloo-utils = "0.3"
 gloo-timers = { version = "0.4", features = ["futures"] }
-shared-frontend = { git = "https://github.com/studio2201/shared-assets.git", tag = "v3.0.34" }
-shared-core = { git = "https://github.com/studio2201/shared-assets.git", tag = "v3.0.34" }
+shared-frontend = { git = "https://github.com/studio2201/shared-assets.git", tag = "v3.0.35" }
+shared-core = { git = "https://github.com/studio2201/shared-assets.git", tag = "v3.0.35" }
 
 [dependencies.web-sys]
 version = "=0.3.98"
